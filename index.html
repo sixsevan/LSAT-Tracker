@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSAT Error Tracker</title>
     <style>
-        /* Modern, Clean Minimalist Styling (GradeSpec Style) */
+        /* Modern, Pixel-Perfect GradeSpec Clean Aesthetic */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; 
             padding: 0; 
             background: #f8fafc; 
             color: #0f172a; 
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. TOP NAVIGATION BAR CODE */
+        /* TOP NAVIGATION BAR */
         .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: white;
-            padding: 15px 40px;
+            padding: 16px 40px;
             border-bottom: 1px solid #e2e8f0;
         }
         .logo {
@@ -42,7 +43,6 @@
             border-radius: 6px;
             transition: all 0.2s ease;
         }
-        /* Active button style matching the dark pill shape in your screenshot */
         .nav-item.active {
             background: #0f172a;
             color: white;
@@ -52,71 +52,88 @@
             background: #f1f5f9;
         }
 
-        /* 2. PAGE CONTAINER LOGIC */
+        /* MAIN APP LAYOUT CONTAINER */
         .container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 0 25px;
         }
         .card { 
             background: white; 
-            padding: 30px; 
+            padding: 35px; 
             border-radius: 12px; 
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01); 
         }
         
-        /* Interactive Subpage Toggling States */
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Form Styling */
-        h2 { margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight: 600; }
-        label { display: block; font-weight: 600; margin-top: 15px; margin-bottom: 5px; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #f8fafc; }
-        input:focus, select:focus, textarea:focus { outline: 2px solid #0f172a; background: white; }
+        /* Form Controls */
+        h2 { margin-top: 0; margin-bottom: 25px; font-size: 26px; font-weight: 700; letter-spacing: -0.6px; }
+        label { display: block; font-weight: 600; margin-top: 20px; margin-bottom: 6px; font-size: 14px; color: #334155; }
+        input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #ffffff; color: #0f172a; transition: all 0.15s ease; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid #0f172a; border-color: transparent; }
+        
+        /* Disabled Input State for Polymorphic Dropdown */
+        select:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+        }
+
+        /* Grid Framework for Side-by-Side Fields */
+        .input-grid {
+            display: flex;
+            gap: 16px;
+        }
+        .grid-6 { flex: 2; } /* Allocation for larger fields */
+        .grid-3 { flex: 1; } /* Allocation for smaller numeric fields */
         
         button.save-btn { 
-            width: 100%; padding: 12px; margin-top: 20px; border-radius: 8px; 
+            width: 100%; padding: 14px; margin-top: 28px; border-radius: 8px; 
             border: none; background: #2563eb; color: white; font-weight: 600; 
             font-size: 15px; cursor: pointer; transition: background 0.2s; 
         }
         button.save-btn:hover { background: #1d4ed8; }
 
-        /* 3. DYNAMIC ERROR CARD & HOVER DELETE BUTTON STYLING */
+        /* DATA RENDERING CARDS */
         .error-item { 
             background: white; 
             border: 1px solid #e2e8f0; 
-            padding: 20px; 
-            margin-top: 15px; 
-            border-radius: 8px; 
+            padding: 24px; 
+            margin-top: 16px; 
+            border-radius: 10px; 
             position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
         }
         .error-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
         }
-        .error-title { font-weight: 700; color: #0f172a; }
-        .error-tag { font-size: 12px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-weight: 500; }
+        .error-title { font-weight: 700; color: #0f172a; font-size: 17px; letter-spacing: -0.3px; }
+        .tags-container { display: flex; gap: 8px; }
+        .error-tag { font-size: 12px; background: #f1f5f9; padding: 5px 10px; border-radius: 6px; font-weight: 600; color: #475569; }
+        .type-tag { background: #eff6ff; color: #1e40af; } 
         
-        /* The requested dynamic hover delete button */
+        .journal-text { margin: 0 0 16px 0; color: #475569; line-height: 1.6; font-size: 15px; }
+        .journal-empty { margin: 0 0 16px 0; color: #94a3b8; font-style: italic; font-size: 14px; }
+
         .delete-btn {
             background: #fee2e2;
             color: #ef4444;
             border: none;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
             transition: all 0.2s ease;
         }
-        /* Changes color to a deeper red when hovered over */
         .delete-btn:hover {
             background: #ef4444;
             color: white;
@@ -139,19 +156,35 @@
             <div class="card">
                 <h2>Log a New Mistake</h2>
                 
-                <label>PrepTest & Section</label>
-                <input type="text" id="ptNumber" placeholder="e.g., PT 90, LR1">
+                <div class="input-grid">
+                    <div class="grid-6">
+                        <label>PrepTest Identifier</label>
+                        <input type="text" id="ptNumber" placeholder="e.g., PT 90">
+                    </div>
+                    <div class="grid-3">
+                        <label>Section #</label>
+                        <input type="text" id="sectionNumber" placeholder="e.g., Sec 1">
+                    </div>
+                    <div class="grid-3">
+                        <label>Question #</label>
+                        <input type="text" id="qNumber" placeholder="e.g., Q14">
+                    </div>
+                </div>
                 
-                <label>Question Type</label>
-                <select id="qType">
-                    <option value="Flaw">Flaw in the Reasoning</option>
-                    <option value="Necessary Assumption">Necessary Assumption</option>
-                    <option value="Sufficient Assumption">Sufficient Assumption</option>
-                    <option value="Strengthen/Weaken">Strengthen / Weaken</option>
+                <label>Exam Section Component</label>
+                <select id="examSection" onchange="handleSectionChange()">
+                    <option value="" selected disabled>-- Select Section Component --</option>
+                    <option value="Logical Reasoning">Logical Reasoning</option>
+                    <option value="Reading Comprehension">Reading Comprehension</option>
                 </select>
                 
-                <label>Analysis Journal</label>
-                <textarea id="journal" rows="4" placeholder="Why did you miss it? What was the trap?"></textarea>
+                <label>Analytical Question Classification</label>
+                <select id="qType" disabled>
+                    <option value="">Select an Exam Section first...</option>
+                </select>
+                
+                <label>Analysis Journal & Structural Defect <span style="font-weight:400; color:#94a3b8;">(Optional)</span></label>
+                <textarea id="journal" rows="4" placeholder="Deconstruct why you fell for the trap, or leave blank to log instantly..."></textarea>
                 
                 <button class="save-btn" onclick="logError()">Save Error</button>
             </div>
@@ -165,62 +198,111 @@
     </div>
 
     <script>
-        // Load existing database array from browser disk memory
-        let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
+        // Mapping dataset arrays straight from your uploaded layout spreadsheets
+        const lrTypes = [
+            "Strengthen", "Weaken", "Flaw", "Principle (supporting)", 
+            "Principle (conform)", "Necessary Assumption", "Sufficient Assumption", "Match the Flaw"
+        ];
 
-        // Initial setup execution
+        const rcTypes = [
+            "Match the Flaw", "Match the Reasoning", "Identify the conclusion", 
+            "Identify the role", "Method of reasoning", "Inference", "Resolve the Discrepancy", 
+            "Point of Discrepancy", "Give an example"
+        ];
+
+        let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
         displayErrors();
 
-        // SUBPAGE NAVIGATION ROUTER FUNCTION
+        // POLYMORPHIC LINK CONTROLLER (Changes options based on selection)
+        function handleSectionChange() {
+            const sectionSelector = document.getElementById('examSection');
+            const typeSelector = document.getElementById('qType');
+            const chosenSection = sectionSelector.value;
+
+            // Clear out old text inside dropdown
+            typeSelector.innerHTML = '';
+
+            if (chosenSection === "Logical Reasoning") {
+                typeSelector.disabled = false;
+                lrTypes.forEach(type => {
+                    let opt = document.createElement('option');
+                    opt.value = type;
+                    opt.textContent = type;
+                    typeSelector.appendChild(opt);
+                });
+            } else if (chosenSection === "Reading Comprehension") {
+                typeSelector.disabled = false;
+                rcTypes.forEach(type => {
+                    let opt = document.createElement('option');
+                    opt.value = type;
+                    opt.textContent = type;
+                    typeSelector.appendChild(opt);
+                });
+            } else {
+                // Fail-safe default fallback state
+                typeSelector.disabled = true;
+                let opt = document.createElement('option');
+                opt.textContent = "Select an Exam Section first...";
+                typeSelector.appendChild(opt);
+            }
+        }
+
         function switchPage(pageName) {
-            // 1. Hide both page container boxes completely
             document.getElementById('page-home').classList.remove('active');
             document.getElementById('page-history').classList.remove('active');
-            
-            // 2. Remove the dark active pill style from both nav menu options
             document.getElementById('nav-home').classList.remove('active');
             document.getElementById('nav-history').classList.remove('active');
             
-            // 3. Make the selected page container block visible and highlight its tab button
             document.getElementById('page-' + pageName).classList.add('active');
             document.getElementById('nav-' + pageName).classList.add('active');
         }
 
         function logError() {
             const pt = document.getElementById('ptNumber').value;
+            const secNum = document.getElementById('sectionNumber').value;
+            const qNum = document.getElementById('qNumber').value;
+            const section = document.getElementById('examSection').value;
             const type = document.getElementById('qType').value;
             const journalEntry = document.getElementById('journal').value;
 
-            if(!pt || !journalEntry) {
-                alert("Please fill out all fields!");
+            // Enforcing structural metrics (Journal is excluded from required check)
+            if(!pt || !secNum || !qNum || !section || !type) {
+                alert("Please fill out all technical configuration fields before saving metric data.");
                 return;
             }
 
-            // Generate a unique ID using timestamps so we know exactly which item to target for deletion
-            const currentError = { id: Date.now(), pt: pt, type: type, text: journalEntry };
+            const currentError = { 
+                id: Date.now(), 
+                pt: pt, 
+                secNum: secNum,
+                qNum: qNum,
+                section: section,
+                type: type, 
+                text: journalEntry.trim() // Trims extra spacing
+            };
+            
             errorLedger.push(currentError);
-
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
 
             displayErrors();
 
-            // Reset UI inputs
+            // Clear inputs, keeping the system ready for the next run
             document.getElementById('ptNumber').value = '';
+            document.getElementById('sectionNumber').value = '';
+            document.getElementById('qNumber').value = '';
             document.getElementById('journal').value = '';
+            document.getElementById('examSection').selectedIndex = 0;
             
-            // UX Bonus: Automatically slide them to the history view so they see their update instantly!
+            // Re-lock the question classification field
+            document.getElementById('qType').disabled = true;
+            document.getElementById('qType').innerHTML = '<option value="">Select an Exam Section first...</option>';
+            
             switchPage('history');
         }
 
-        // DELETION LOGIC (Think of this like vector filtering or array cleanup)
         function deleteError(idToDrop) {
-            // Keep only items that DO NOT match the ID we want to clear
             errorLedger = errorLedger.filter(item => item.id !== idToDrop);
-            
-            // Rewrite the cleaned dataset array back to localStorage
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-            
-            // Rerender the updated list on screen
             displayErrors();
         }
 
@@ -236,12 +318,21 @@
             errorLedger.forEach(item => {
                 const element = document.createElement('div');
                 element.className = 'error-item';
+                
+                // Renders optional journal text conditionally
+                const journalHTML = item.text 
+                    ? `<p class="journal-text">${item.text}</p>` 
+                    : `<p class="journal-empty">No analysis entry recorded for this error tracking parameter.</p>`;
+
                 element.innerHTML = `
                     <div class="error-header">
-                        <span class="error-title">${item.pt}</span>
-                        <span class="error-tag">${item.type}</span>
+                        <span class="error-title">${item.pt} — ${item.secNum} — ${item.qNum}</span>
+                        <div class="tags-container">
+                            <span class="error-tag">${item.section}</span>
+                            <span class="error-tag type-tag">${item.type}</span>
+                        </div>
                     </div>
-                    <p style="margin: 0 0 15px 0; color: #475569; line-height: 1.5; font-size: 15px;">${item.text}</p>
+                    ${journalHTML}
                     <div style="text-align: right;">
                         <button class="delete-btn" onclick="deleteError(${item.id})">Delete</button>
                     </div>
