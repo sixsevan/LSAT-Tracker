@@ -139,7 +139,7 @@
         .error-tag { font-size: 12px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #475569; }
         .type-tag { background: #e0e7ff; color: #3730a3; } 
         
-        /* STEP 1: Redesigned Draft Dropdown (Slate Dashed) */
+        /* Draft Dropdown */
         .inline-select {
             padding: 6px 30px 6px 12px;
             font-size: 12px;
@@ -173,7 +173,7 @@
         }
         .delete-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
 
-        /* STEP 3: Bulk Actions Bar */
+        /* Bulk Actions Bar */
         .bulk-action-bar {
             display: flex;
             justify-content: space-between;
@@ -213,11 +213,11 @@
                 <div class="input-grid">
                     <div class="grid-half">
                         <label>PrepTest #</label>
-                        <input type="text" id="ptNumber" placeholder="e.g., 90">
+                        <input type="text" id="ptNumber" placeholder="e.g., 143">
                     </div>
                     <div class="grid-half">
                         <label>Section #</label>
-                        <input type="text" id="sectionNumber" placeholder="e.g., 1">
+                        <input type="text" id="sectionNumber" placeholder="e.g., Sec 1">
                     </div>
                 </div>
                 
@@ -229,7 +229,7 @@
                 </select>
 
                 <label>Question #(s)</label>
-                <input type="text" id="qNumber" placeholder="e.g., 15 or 14, 17, 21">
+                <input type="text" id="qNumber" placeholder="e.g., 14, 17, 21 (Use commas for bulk logging)">
                 
                 <label>Analytical Classification <span style="font-weight:400; color:#94a3b8; text-transform:none;">(Leave blank to log as Draft)</span></label>
                 <select id="qType" disabled>
@@ -260,6 +260,7 @@
     </div>
 
     <script>
+        // 1. Data Arrays & Dictionaries
         const lrTypes = [
             "Assumptions", "Conclusions and Disputes", "Deductions and Inference",
             "Explain or Resolve", "Flaws", "Matching Flaws", 
@@ -274,13 +275,61 @@
             "Recognizing Elements of the Passage"
         ];
 
-        let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
-        
-        // State tracker for bulk actions
-        let selectedIds = new Set();
+        // The Master Translation Engine: Maps New PTs to Old Base & Experimental PTs
+        const ptDictionary = {
+            "158": { base: "90", exp: "91" }, "157": { base: "93", exp: "91" }, "156": { base: "94", exp: "92" },
+            "155": { base: "89", exp: "92" }, "154": { base: "88", exp: "82" }, "153": { base: "87", exp: "82" },
+            "152": { base: "86", exp: "82" }, "151": { base: "85", exp: "81" }, "150": { base: "84", exp: "81" },
+            "149": { base: "83", exp: "72" }, "148": { base: "80", exp: "72" }, "147": { base: "79", exp: "72" },
+            "146": { base: "78", exp: "81" }, "145": { base: "77", exp: "61" }, "144": { base: "76", exp: "70" },
+            "143": { base: "75", exp: "61" }, "142": { base: "74", exp: "61" }, "141": { base: "73", exp: "70" },
+            "140": { base: "71", exp: "70" }, "139": { base: "69", exp: "60" }, "138": { base: "68", exp: "60" },
+            "137": { base: "67", exp: "60" }, "136": { base: "66", exp: "52" }, "135": { base: "65", exp: "52" },
+            "134": { base: "64", exp: "52" }, "133": { base: "63", exp: "51" }, "132": { base: "62", exp: "51" },
+            "131": { base: "59", exp: "51" }, "130": { base: "58", exp: "50" }, "129": { base: "57", exp: "50" },
+            "128": { base: "c2", exp: "50" }, "127": { base: "56", exp: "42" }, "126": { base: "55", exp: "42" },
+            "125": { base: "54", exp: "42" }, "124": { base: "53", exp: "41" }, "123": { base: "june-2007", exp: "41" },
+            "122": { base: "49", exp: "41" }, "121": { base: "48", exp: "40" }, "120": { base: "47", exp: "40" },
+            "119": { base: "46", exp: "40" }, "118": { base: "45", exp: "32" }, "117": { base: "44", exp: "32" },
+            "116": { base: "43", exp: "32" }, "115": { base: "39", exp: "31" }, "114": { base: "38", exp: "31" },
+            "113": { base: "37", exp: "31" }, "112": { base: "36", exp: "30" }, "111": { base: "35", exp: "30" },
+            "110": { base: "34", exp: "30" }, "109": { base: "33", exp: "22" }, "108": { base: "c1", exp: "22" },
+            "107": { base: "29", exp: "22" }, "106": { base: "28", exp: "20" }, "105": { base: "b", exp: "20" },
+            "104": { base: "27", exp: "20" }, "103": { base: "26", exp: "19" }, "102": { base: "25", exp: "19" },
+            "101": { base: "24", exp: "19" }
+        };
 
+        // 2. System State
+        let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
+        let selectedIds = new Set();
         displayErrors();
 
+        // 3. UI Generator Functions
+        function generateExplanationButtons(item) {
+            // Strip any "PT" text if user typed it, leaving just the number
+            const cleanPT = item.pt.replace(/[^0-9]/g, '');
+            const ptData = ptDictionary[cleanPT];
+            const cleanQNum = item.qNum.replace('Q', '').trim();
+            
+            const btnStyle = "text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.2s ease;";
+            const primaryBtn = `${btnStyle} background: #f8fafc; color: #3b82f6; border: 1px solid #bfdbfe;`;
+            const secondaryBtn = `${btnStyle} background: #fffbeb; color: #d97706; border: 1px solid #fde68a;`;
+
+            if (!ptData) {
+                return `<a href="https://lsathacks.com/explanations/" target="_blank" style="${primaryBtn}">Find Explanation ↗</a>`;
+            }
+
+            if (item.section === "Reading Comprehension") {
+                return `<a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/reading-comprehension/q-${cleanQNum}/" target="_blank" style="${primaryBtn}">Read RC Explanation ↗</a>`;
+            } else {
+                return `
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/" target="_blank" style="${primaryBtn}">Check Base PT (${ptData.base}) ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/" target="_blank" style="${secondaryBtn}">Check Exp PT (${ptData.exp}) ↗</a>
+                `;
+            }
+        }
+
+        // 4. Core App Logic
         function handleSectionChange() {
             const sectionSelector = document.getElementById('examSection');
             const typeSelector = document.getElementById('qType');
@@ -370,17 +419,16 @@
             }
         }
 
-        // STEP 2: Safety Confirmation for Deletion
         function deleteError(idToDrop) {
             if(confirm("Are you sure you want to permanently delete this log?")) {
                 errorLedger = errorLedger.filter(item => item.id !== idToDrop);
-                selectedIds.delete(idToDrop); // Clean up if it was checked
+                selectedIds.delete(idToDrop); 
                 localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
                 displayErrors();
             }
         }
 
-        // --- BULK ACTION LOGIC ---
+        // 5. Bulk Actions & Inline Editing
         function toggleSelect(checkbox, id) {
             if (checkbox.checked) selectedIds.add(id);
             else selectedIds.delete(id);
@@ -393,7 +441,7 @@
             } else {
                 selectedIds.clear();
             }
-            displayErrors(); // Quick re-render to visually check/uncheck all boxes
+            displayErrors(); 
         }
 
         function deleteSelected() {
@@ -421,7 +469,6 @@
                 btn.innerText = `Delete Selected`;
             }
             
-            // Sync the "Select All" box state
             if(errorLedger.length > 0 && selectedIds.size === errorLedger.length) {
                 selectAllCheck.checked = true;
             } else {
@@ -453,6 +500,7 @@
             }
         }
 
+        // 6. Main Render Loop
         function displayErrors() {
             const container = document.getElementById('errorList');
             const bulkBar = document.getElementById('bulkActionBar');
@@ -465,7 +513,7 @@
             }
 
             bulkBar.style.display = 'flex';
-            updateBulkUI(); // Ensure UI matches the selectedIds Set
+            updateBulkUI(); 
 
             const reversedLedger = [...errorLedger].reverse();
 
@@ -490,14 +538,14 @@
                     ? `<p class="journal-text">${item.text}</p>` 
                     : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
 
-                // Check if this item is currently in the selected Set to render it checked
                 const isChecked = selectedIds.has(item.id) ? 'checked' : '';
 
+                // NEW: Notice the generateExplanationButtons() being injected below the journal
                 element.innerHTML = `
                     <div class="error-header">
                         <div class="checkbox-container">
                             <input type="checkbox" class="custom-checkbox" value="${item.id}" onchange="toggleSelect(this, ${item.id})" ${isChecked}>
-                            <span class="error-title">${item.pt} — ${item.secNum} — Q${item.qNum.replace('Q','')}</span>
+                            <span class="error-title">PT ${item.pt.replace(/[^0-9]/g, '')} — ${item.secNum} — Q${item.qNum.replace('Q','')}</span>
                         </div>
                         <div class="tags-container">
                             <span class="error-tag">${item.section}</span>
@@ -509,7 +557,10 @@
                         ${journalContent}
                     </div>
                     
-                    <div style="text-align: right;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 8px;">
+                            ${generateExplanationButtons(item)}
+                        </div>
                         <button class="delete-btn" onclick="deleteError(${item.id})">Delete</button>
                     </div>
                 `;
@@ -518,4 +569,4 @@
         }
     </script>
 </body>
-</html>
+</html>feat: map all 58 new PrepTests to LSATHacks external router.
