@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LSAT Error Log</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f3f4f6; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select, textarea, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: #2563eb; color: white; font-weight: bold; cursor: pointer; border: none; }
+        button:hover { background: #1d4ed8; }
+        .error-item { background: #fef2f2; border-left: 4px solid #ef4444; padding: 10px; margin-top: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>LSAT Error Log</h2>
+        
+        <input type="text" id="ptNumber" placeholder="PrepTest & Section (e.g., PT 90, LR1)">
+        
+        <select id="qType">
+            <option value="Flaw">Flaw in the Reasoning</option>
+            <option value="Necessary Assumption">Necessary Assumption</option>
+            <option value="Sufficient Assumption">Sufficient Assumption</option>
+            <option value="Strengthen/Weaken">Strengthen / Weaken</option>
+        </select>
+        
+        <textarea id="journal" placeholder="Why did you miss it? What was the trap?"></textarea>
+        
+        <button onclick="logError()">Save Error</button>
+        
+        <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
+        <h3>Logged Mistakes:</h3>
+        <div id="errorList"></div>
+    </div>
+
+    <script>
+        let errorLedger = [];
+
+        function logError() {
+            const pt = document.getElementById('ptNumber').value;
+            const type = document.getElementById('qType').value;
+            const journalEntry = document.getElementById('journal').value;
+
+            if(!pt || !journalEntry) {
+                alert("Please fill out all fields!");
+                return;
+            }
+
+            const currentError = { pt: pt, type: type, text: journalEntry };
+            errorLedger.push(currentError);
+
+            displayErrors();
+
+            // Clear inputs for next time
+            document.getElementById('ptNumber').value = '';
+            document.getElementById('journal').value = '';
+        }
+
+        function displayErrors() {
+            const container = document.getElementById('errorList');
+            container.innerHTML = ''; 
+
+            errorLedger.forEach(item => {
+                const element = document.createElement('div');
+                element.className = 'error-item';
+                element.innerHTML = `<strong>${item.pt} (${item.type})</strong><p style="margin: 5px 0 0 0;">${item.text}</p>`;
+                container.appendChild(element);
+            });
+        }
+    </script>
+</body>
+</html>
