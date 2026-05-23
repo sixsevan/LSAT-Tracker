@@ -75,7 +75,7 @@
         input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #ffffff; color: #0f172a; transition: all 0.15s ease; }
         input:focus, select:focus, textarea:focus { outline: 2px solid #0f172a; border-color: transparent; }
         
-        /* Disabled Input State for Polymorphic Dropdown */
+        /* Disabled Input State */
         select:disabled {
             background: #f1f5f9;
             color: #94a3b8;
@@ -88,8 +88,7 @@
             display: flex;
             gap: 16px;
         }
-        .grid-6 { flex: 2; } /* Allocation for larger fields */
-        .grid-3 { flex: 1; } /* Allocation for smaller numeric fields */
+        .grid-half { flex: 1; }
         
         button.save-btn { 
             width: 100%; padding: 14px; margin-top: 28px; border-radius: 8px; 
@@ -116,10 +115,24 @@
             margin-bottom: 14px;
         }
         .error-title { font-weight: 700; color: #0f172a; font-size: 17px; letter-spacing: -0.3px; }
-        .tags-container { display: flex; gap: 8px; }
+        .tags-container { display: flex; gap: 8px; align-items: center; }
         .error-tag { font-size: 12px; background: #f1f5f9; padding: 5px 10px; border-radius: 6px; font-weight: 600; color: #475569; }
         .type-tag { background: #eff6ff; color: #1e40af; } 
         
+        /* New styling for the inline draft dropdown */
+        .inline-select {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid #fef08a;
+            background: #fef9c3;
+            color: #854d0e;
+            cursor: pointer;
+            width: auto;
+        }
+        .inline-select:focus { outline: 2px solid #ca8a04; }
+
         .journal-text { margin: 0 0 16px 0; color: #475569; line-height: 1.6; font-size: 15px; }
         .journal-empty { margin: 0 0 16px 0; color: #94a3b8; font-style: italic; font-size: 14px; }
 
@@ -157,17 +170,13 @@
                 <h2>Log a New Mistake</h2>
                 
                 <div class="input-grid">
-                    <div class="grid-6">
+                    <div class="grid-half">
                         <label>PrepTest #</label>
                         <input type="text" id="ptNumber" placeholder="e.g., PT 90">
                     </div>
-                    <div class="grid-3">
+                    <div class="grid-half">
                         <label>Section #</label>
                         <input type="text" id="sectionNumber" placeholder="e.g., Sec 1">
-                    </div>
-                    <div class="grid-3">
-                        <label>Question #</label>
-                        <input type="text" id="qNumber" placeholder="e.g., Q14">
                     </div>
                 </div>
                 
@@ -177,8 +186,11 @@
                     <option value="Logical Reasoning">Logical Reasoning</option>
                     <option value="Reading Comprehension">Reading Comprehension</option>
                 </select>
+
+                <label>Question #(s)</label>
+                <input type="text" id="qNumber" placeholder="e.g., 14, 17, 21 (Use commas for bulk logging)">
                 
-                <label>Analytical Question Classification</label>
+                <label>Analytical Question Classification <span style="font-weight:400; color:#94a3b8;">(Leave blank to log as Draft)</span></label>
                 <select id="qType" disabled>
                     <option value="">Select an Exam Section first...</option>
                 </select>
@@ -198,42 +210,29 @@
     </div>
 
     <script>
-        // Mapping dataset arrays straight from your uploaded layout spreadsheets
-        // The fully consolidated Analytics LR Mapping
         const lrTypes = [
-            "Assumptions",
-            "Conclusions and Disputes",
-            "Deductions and Inference",
-            "Explain or Resolve",
-            "Flaws",
-            "Matching Flaws",
-            "Matching Structure and Principles",
-            "Strengthen or Weaken",
+            "Assumptions", "Conclusions and Disputes", "Deductions and Inference",
+            "Explain or Resolve", "Flaws", "Matching Flaws", 
+            "Matching Structure and Principles", "Strengthen or Weaken", 
             "Techniques, Roles, and Principles"
         ];
 
-       // The fully consolidated Analytics RC Mapping
         const rcTypes = [
-            "Analyzing how the Parts Work",
-            "Applying the Argument to New Contexts",
-            "Author's Attitude",
-            "Drawing Inferences",
-            "Identifying Main Points and Primary Purposes",
-            "Meaning in Context",
+            "Analyzing how the Parts Work", "Applying the Argument to New Contexts",
+            "Author's Attitude", "Drawing Inferences", 
+            "Identifying Main Points and Primary Purposes", "Meaning in Context", 
             "Recognizing Elements of the Passage"
         ];
 
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
         displayErrors();
 
-        // POLYMORPHIC LINK CONTROLLER (Changes options based on selection)
         function handleSectionChange() {
             const sectionSelector = document.getElementById('examSection');
             const typeSelector = document.getElementById('qType');
             const chosenSection = sectionSelector.value;
 
-            // Clear out old text inside dropdown
-            typeSelector.innerHTML = '';
+            typeSelector.innerHTML = '<option value="">-- Select Type (or leave blank) --</option>';
 
             if (chosenSection === "Logical Reasoning") {
                 typeSelector.disabled = false;
@@ -252,11 +251,8 @@
                     typeSelector.appendChild(opt);
                 });
             } else {
-                // Fail-safe default fallback state
                 typeSelector.disabled = true;
-                let opt = document.createElement('option');
-                opt.textContent = "Select an Exam Section first...";
-                typeSelector.appendChild(opt);
+                typeSelector.innerHTML = '<option value="">Select an Exam Section first...</option>';
             }
         }
 
@@ -273,44 +269,60 @@
         function logError() {
             const pt = document.getElementById('ptNumber').value;
             const secNum = document.getElementById('sectionNumber').value;
-            const qNum = document.getElementById('qNumber').value;
+            const qNumRaw = document.getElementById('qNumber').value;
             const section = document.getElementById('examSection').value;
             const type = document.getElementById('qType').value;
             const journalEntry = document.getElementById('journal').value;
 
-            // Enforcing structural metrics (Journal is excluded from required check)
-            if(!pt || !secNum || !qNum || !section || !type) {
-                alert("Please fill out all technical configuration fields before saving metric data.");
+            // Notice 'type' is no longer strictly required to pass validation
+            if(!pt || !secNum || !qNumRaw || !section) {
+                alert("Please fill out PT, Section #, Exam Component, and Question #s to log data.");
                 return;
             }
 
-            const currentError = { 
-                id: Date.now(), 
-                pt: pt, 
-                secNum: secNum,
-                qNum: qNum,
-                section: section,
-                type: type, 
-                text: journalEntry.trim() // Trims extra spacing
-            };
-            
-            errorLedger.push(currentError);
-            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+            // String Parsing: Split commas, remove extra spaces, and ignore empty chunks
+            const qNumbers = qNumRaw.split(',').map(q => q.trim()).filter(q => q.length > 0);
 
+            // Create a distinct database entry for EVERY question number typed
+            qNumbers.forEach(q => {
+                const currentError = { 
+                    id: Date.now() + Math.random(), // Math.random prevents identical IDs in rapid loops
+                    pt: pt, 
+                    secNum: secNum,
+                    qNum: q,
+                    section: section,
+                    type: type || 'Pending', 
+                    status: type ? 'Complete' : 'Draft', // Determines UI rendering state
+                    text: journalEntry.trim()
+                };
+                errorLedger.push(currentError);
+            });
+            
+            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors();
 
-            // Clear inputs, keeping the system ready for the next run
+            // Reset inputs
             document.getElementById('ptNumber').value = '';
             document.getElementById('sectionNumber').value = '';
             document.getElementById('qNumber').value = '';
             document.getElementById('journal').value = '';
             document.getElementById('examSection').selectedIndex = 0;
             
-            // Re-lock the question classification field
             document.getElementById('qType').disabled = true;
             document.getElementById('qType').innerHTML = '<option value="">Select an Exam Section first...</option>';
             
             switchPage('history');
+        }
+
+        // Asynchronous Update Function: Fires when a dropdown in the History tab is changed
+        function updateErrorType(id, newType) {
+            const errorIndex = errorLedger.findIndex(item => item.id === id);
+            if(errorIndex !== -1) {
+                errorLedger[errorIndex].type = newType;
+                errorLedger[errorIndex].status = 'Complete';
+                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+                displayErrors(); // Re-render to swap the dropdown into a static blue tag
+            }
         }
 
         function deleteError(idToDrop) {
@@ -328,11 +340,27 @@
                 return;
             }
 
-            errorLedger.forEach(item => {
+            // Display errors (newest first for better UX)
+            const reversedLedger = [...errorLedger].reverse();
+
+            reversedLedger.forEach(item => {
                 const element = document.createElement('div');
                 element.className = 'error-item';
                 
-                // Renders optional journal text conditionally
+                // UX Logic: Render a blue tag if Complete, or a yellow dropdown if Draft
+                let typeHTML = '';
+                if (item.status === 'Draft') {
+                    const optionsArray = item.section === 'Logical Reasoning' ? lrTypes : rcTypes;
+                    let optionsString = '<option value="" disabled selected>⚠️ Assign Type...</option>';
+                    optionsArray.forEach(opt => {
+                        optionsString += `<option value="${opt}">${opt}</option>`;
+                    });
+                    
+                    typeHTML = `<select class="inline-select" onchange="updateErrorType(${item.id}, this.value)">${optionsString}</select>`;
+                } else {
+                    typeHTML = `<span class="error-tag type-tag">${item.type}</span>`;
+                }
+
                 const journalHTML = item.text 
                     ? `<p class="journal-text">${item.text}</p>` 
                     : `<p class="journal-empty">No analysis entry recorded for this error tracking parameter.</p>`;
@@ -342,7 +370,7 @@
                         <span class="error-title">${item.pt} — ${item.secNum} — ${item.qNum}</span>
                         <div class="tags-container">
                             <span class="error-tag">${item.section}</span>
-                            <span class="error-tag type-tag">${item.type}</span>
+                            ${typeHTML}
                         </div>
                     </div>
                     ${journalHTML}
