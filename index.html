@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; 
             padding: 0; 
-            background: #f4f6f8; /* Softer off-white background */
+            background: #f4f6f8; 
             color: #1e293b; 
             -webkit-font-smoothing: antialiased;
         }
@@ -76,8 +76,7 @@
         /* Clean Form Controls */
         label { display: block; font-weight: 600; margin-top: 20px; margin-bottom: 8px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Custom Dropdown & Input Styling */
-        input, select, textarea { 
+        input[type="text"], select, textarea { 
             width: 100%; 
             padding: 14px; 
             border-radius: 8px; 
@@ -98,13 +97,12 @@
             background-size: 10px auto;
         }
 
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         select:disabled { background-color: #f8fafc; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; background-image: none; }
 
         .input-grid { display: flex; gap: 20px; }
         .grid-half { flex: 1; }
         
-        /* GradeSpec Navy Button */
         button.save-btn { 
             width: 100%; padding: 14px; margin-top: 32px; border-radius: 8px; 
             border: none; background: #334155; color: white; font-weight: 600; 
@@ -116,8 +114,8 @@
         .error-item { 
             background: white; 
             border: 1px solid #e2e8f0; 
-            padding: 24px; 
-            margin-top: 20px; 
+            padding: 20px 24px; 
+            margin-top: 16px; 
             border-radius: 12px; 
             position: relative;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
@@ -130,59 +128,70 @@
             padding-bottom: 16px;
             margin-bottom: 16px;
         }
+        
+        /* Checkbox Styling */
+        .checkbox-container { display: flex; align-items: center; gap: 12px; }
+        .custom-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #334155; }
+        
         .error-title { font-weight: 700; color: #0f172a; font-size: 18px; letter-spacing: -0.3px; }
         .tags-container { display: flex; gap: 8px; align-items: center; }
         
-        /* GradeSpec Style Pills */
         .error-tag { font-size: 12px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #475569; }
         .type-tag { background: #e0e7ff; color: #3730a3; } 
         
-        /* Redesigned Draft Dropdown */
+        /* STEP 1: Redesigned Draft Dropdown (Slate Dashed) */
         .inline-select {
             padding: 6px 30px 6px 12px;
             font-size: 12px;
             font-weight: 600;
             border-radius: 20px;
-            border: 1px solid #fcd34d;
-            background-color: #fef3c7;
-            color: #92400e;
+            border: 1px dashed #94a3b8;
+            background-color: #f8fafc;
+            color: #475569;
             cursor: pointer;
             background-position: right 10px top 50%;
             background-size: 8px auto;
+            transition: all 0.2s ease;
         }
-        .inline-select:focus { box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.3); border-color: #f59e0b; }
+        .inline-select:hover { border-style: solid; border-color: #64748b; background-color: #f1f5f9; }
+        .inline-select:focus { outline: none; border-style: solid; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
         /* INLINE EDITING STYLES */
-        .journal-wrapper {
-            padding: 12px;
-            margin: -12px -12px 16px -12px;
-            border-radius: 8px;
-            transition: background 0.2s;
-            cursor: text;
-        }
+        .journal-wrapper { padding: 12px; margin: -12px -12px 16px -12px; border-radius: 8px; transition: background 0.2s; cursor: text; }
         .journal-wrapper:hover { background: #f8fafc; }
         .journal-text { margin: 0; color: #334155; line-height: 1.6; font-size: 15px; }
         .journal-empty { margin: 0; color: #94a3b8; font-style: italic; font-size: 14px; }
         
         .edit-textarea { margin-bottom: 10px; }
-        .inline-save-btn {
-            background: #3b82f6; color: white; border: none; padding: 6px 12px;
-            border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;
-        }
+        .inline-save-btn { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
         .inline-save-btn:hover { background: #2563eb; }
 
+        /* Button Styling */
         .delete-btn {
-            background: white;
-            color: #ef4444;
-            border: 1px solid #fee2e2;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
+            background: white; color: #ef4444; border: 1px solid #fee2e2; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease;
         }
         .delete-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
+
+        /* STEP 3: Bulk Actions Bar */
+        .bulk-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .bulk-delete-btn {
+            background: #ef4444; color: white; border: none; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            opacity: 0.5; pointer-events: none; transition: all 0.2s ease;
+        }
+        .bulk-delete-btn.active { opacity: 1; pointer-events: auto; }
+        .bulk-delete-btn.active:hover { background: #dc2626; }
     </style>
 </head>
 <body>
@@ -236,6 +245,15 @@
 
         <div id="page-history" class="page">
             <h2>Your Logged Mistakes</h2>
+            
+            <div id="bulkActionBar" class="bulk-action-bar" style="display: none;">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
+                    <span style="font-size: 14px; font-weight: 600; color: #475569;" id="selectedCountText">Select All</span>
+                </div>
+                <button id="bulkDeleteBtn" class="bulk-delete-btn" onclick="deleteSelected()">Delete Selected</button>
+            </div>
+
             <div id="errorList"><em>No errors logged yet. Master your logic inputs on the home tab!</em></div>
         </div>
 
@@ -257,6 +275,10 @@
         ];
 
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
+        
+        // State tracker for bulk actions
+        let selectedIds = new Set();
+
         displayErrors();
 
         function handleSectionChange() {
@@ -348,13 +370,65 @@
             }
         }
 
+        // STEP 2: Safety Confirmation for Deletion
         function deleteError(idToDrop) {
-            errorLedger = errorLedger.filter(item => item.id !== idToDrop);
-            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-            displayErrors();
+            if(confirm("Are you sure you want to permanently delete this log?")) {
+                errorLedger = errorLedger.filter(item => item.id !== idToDrop);
+                selectedIds.delete(idToDrop); // Clean up if it was checked
+                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+                displayErrors();
+            }
         }
 
-        // --- NEW INLINE EDITING LOGIC ---
+        // --- BULK ACTION LOGIC ---
+        function toggleSelect(checkbox, id) {
+            if (checkbox.checked) selectedIds.add(id);
+            else selectedIds.delete(id);
+            updateBulkUI();
+        }
+
+        function toggleSelectAll(checkbox) {
+            if (checkbox.checked) {
+                errorLedger.forEach(item => selectedIds.add(item.id));
+            } else {
+                selectedIds.clear();
+            }
+            displayErrors(); // Quick re-render to visually check/uncheck all boxes
+        }
+
+        function deleteSelected() {
+            if (selectedIds.size === 0) return;
+            if (confirm(`Are you sure you want to permanently delete ${selectedIds.size} logged mistake(s)?`)) {
+                errorLedger = errorLedger.filter(item => !selectedIds.has(item.id));
+                selectedIds.clear();
+                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+                displayErrors();
+            }
+        }
+
+        function updateBulkUI() {
+            const btn = document.getElementById('bulkDeleteBtn');
+            const countText = document.getElementById('selectedCountText');
+            const selectAllCheck = document.getElementById('selectAllCheckbox');
+
+            if (selectedIds.size > 0) {
+                btn.classList.add('active');
+                countText.innerText = `${selectedIds.size} selected`;
+                btn.innerText = `Delete (${selectedIds.size})`;
+            } else {
+                btn.classList.remove('active');
+                countText.innerText = `Select All`;
+                btn.innerText = `Delete Selected`;
+            }
+            
+            // Sync the "Select All" box state
+            if(errorLedger.length > 0 && selectedIds.size === errorLedger.length) {
+                selectAllCheck.checked = true;
+            } else {
+                selectAllCheck.checked = false;
+            }
+        }
+
         function enableJournalEdit(id) {
             const item = errorLedger.find(e => e.id === id);
             const wrapper = document.getElementById(`journal-wrapper-${id}`);
@@ -375,18 +449,23 @@
             if(errorIndex !== -1) {
                 errorLedger[errorIndex].text = newText;
                 localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-                displayErrors(); // Re-render to show static text again
+                displayErrors();
             }
         }
 
         function displayErrors() {
             const container = document.getElementById('errorList');
+            const bulkBar = document.getElementById('bulkActionBar');
             container.innerHTML = ''; 
 
             if (errorLedger.length === 0) {
                 container.innerHTML = '<em>No errors logged yet. Master your logic inputs on the home tab!</em>';
+                bulkBar.style.display = 'none';
                 return;
             }
+
+            bulkBar.style.display = 'flex';
+            updateBulkUI(); // Ensure UI matches the selectedIds Set
 
             const reversedLedger = [...errorLedger].reverse();
 
@@ -407,14 +486,19 @@
                     typeHTML = `<span class="error-tag type-tag">${item.type}</span>`;
                 }
 
-                // Inline edit wrapper with ondblclick trigger
                 const journalContent = item.text 
                     ? `<p class="journal-text">${item.text}</p>` 
                     : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
 
+                // Check if this item is currently in the selected Set to render it checked
+                const isChecked = selectedIds.has(item.id) ? 'checked' : '';
+
                 element.innerHTML = `
                     <div class="error-header">
-                        <span class="error-title">${item.pt} — ${item.secNum} — Q${item.qNum.replace('Q','')}</span>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="custom-checkbox" value="${item.id}" onchange="toggleSelect(this, ${item.id})" ${isChecked}>
+                            <span class="error-title">${item.pt} — ${item.secNum} — Q${item.qNum.replace('Q','')}</span>
+                        </div>
                         <div class="tags-container">
                             <span class="error-tag">${item.section}</span>
                             ${typeHTML}
