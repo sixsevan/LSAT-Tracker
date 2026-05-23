@@ -158,7 +158,7 @@
                 
                 <div class="input-grid">
                     <div class="grid-6">
-                        <label>PrepTest Identifier</label>
+                        <label>PrepTest #</label>
                         <input type="text" id="ptNumber" placeholder="e.g., PT 90">
                     </div>
                     <div class="grid-3">
@@ -184,7 +184,7 @@
                 </select>
                 
                 <label>Analysis Journal & Structural Defect <span style="font-weight:400; color:#94a3b8;">(Optional)</span></label>
-                <textarea id="journal" rows="4" placeholder="Deconstruct why you fell for the trap, or leave blank to log instantly..."></textarea>
+                <textarea id="journal" rows="4"></textarea>
                 
                 <button class="save-btn" onclick="logError()">Save Error</button>
             </div>
@@ -199,15 +199,28 @@
 
     <script>
         // Mapping dataset arrays straight from your uploaded layout spreadsheets
+        // The fully consolidated Analytics LR Mapping
         const lrTypes = [
-            "Strengthen", "Weaken", "Flaw", "Principle (supporting)", 
-            "Principle (conform)", "Necessary Assumption", "Sufficient Assumption", "Match the Flaw"
+            "Assumptions",
+            "Conclusions and Disputes",
+            "Deductions and Inference",
+            "Explain or Resolve",
+            "Flaws",
+            "Matching Flaws",
+            "Matching Structure and Principles",
+            "Strengthen or Weaken",
+            "Techniques, Roles, and Principles"
         ];
 
+       // The fully consolidated Analytics RC Mapping
         const rcTypes = [
-            "Match the Flaw", "Match the Reasoning", "Identify the conclusion", 
-            "Identify the role", "Method of reasoning", "Inference", "Resolve the Discrepancy", 
-            "Point of Discrepancy", "Give an example"
+            "Analyzing how the Parts Work",
+            "Applying the Argument to New Contexts",
+            "Author's Attitude",
+            "Drawing Inferences",
+            "Identifying Main Points and Primary Purposes",
+            "Meaning in Context",
+            "Recognizing Elements of the Passage"
         ];
 
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
