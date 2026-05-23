@@ -311,7 +311,8 @@
             const ptData = ptDictionary[cleanPT];
             const cleanQNum = item.qNum.replace('Q', '').trim();
             
-            const btnStyle = "text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.2s ease;";
+            // Compact button styling for the brute-force array
+            const btnStyle = "text-decoration: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; display: inline-block; white-space: nowrap;";
             const primaryBtn = `${btnStyle} background: #f8fafc; color: #3b82f6; border: 1px solid #bfdbfe;`;
             const secondaryBtn = `${btnStyle} background: #fffbeb; color: #d97706; border: 1px solid #fde68a;`;
 
@@ -320,11 +321,16 @@
             }
 
             if (item.section === "Reading Comprehension") {
+                // RC is 100% predictable. Direct link to the question.
                 return `<a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/reading-comprehension/q-${cleanQNum}/" target="_blank" style="${primaryBtn}">Read RC Explanation ↗</a>`;
             } else {
+                // Option 1: The Brute-Force Direct Routing Array
+                // We generate all 4 possible URL permutations as compact, clickable pills.
                 return `
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/" target="_blank" style="${primaryBtn}">Check Base PT (${ptData.base}) ↗</a>
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/" target="_blank" style="${secondaryBtn}">Check Exp PT (${ptData.exp}) ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${cleanQNum}/" target="_blank" style="${primaryBtn}" title="Base PT ${ptData.base} - LR 1">Base LR1 ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${cleanQNum}/" target="_blank" style="${primaryBtn}" title="Base PT ${ptData.base} - LR 2">Base LR2 ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-1/q-${cleanQNum}/" target="_blank" style="${secondaryBtn}" title="Experimental PT ${ptData.exp} - LR 1">Exp LR1 ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-2/q-${cleanQNum}/" target="_blank" style="${secondaryBtn}" title="Experimental PT ${ptData.exp} - LR 2">Exp LR2 ↗</a>
                 `;
             }
         }
@@ -569,4 +575,4 @@
         }
     </script>
 </body>
-</html>feat: map all 58 new PrepTests to LSATHacks external router.
+</html>
