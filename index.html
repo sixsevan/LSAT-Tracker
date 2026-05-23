@@ -2,46 +2,189 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LSAT Error Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSAT Error Tracker</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f3f4f6; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input, select, textarea, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background: #2563eb; color: white; font-weight: bold; cursor: pointer; border: none; }
-        button:hover { background: #1d4ed8; }
-        .error-item { background: #fef2f2; border-left: 4px solid #ef4444; padding: 10px; margin-top: 10px; border-radius: 4px; }
+        /* Modern, Clean Minimalist Styling (GradeSpec Style) */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f8fafc; 
+            color: #0f172a; 
+        }
+
+        /* 1. TOP NAVIGATION BAR CODE */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px 40px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+        }
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        .nav-item {
+            font-size: 15px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        /* Active button style matching the dark pill shape in your screenshot */
+        .nav-item.active {
+            background: #0f172a;
+            color: white;
+        }
+        .nav-item:hover:not(.active) {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        /* 2. PAGE CONTAINER LOGIC */
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+        }
+        
+        /* Interactive Subpage Toggling States */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Form Styling */
+        h2 { margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight: 600; }
+        label { display: block; font-weight: 600; margin-top: 15px; margin-bottom: 5px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #f8fafc; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid #0f172a; background: white; }
+        
+        button.save-btn { 
+            width: 100%; padding: 12px; margin-top: 20px; border-radius: 8px; 
+            border: none; background: #2563eb; color: white; font-weight: 600; 
+            font-size: 15px; cursor: pointer; transition: background 0.2s; 
+        }
+        button.save-btn:hover { background: #1d4ed8; }
+
+        /* 3. DYNAMIC ERROR CARD & HOVER DELETE BUTTON STYLING */
+        .error-item { 
+            background: white; 
+            border: 1px solid #e2e8f0; 
+            padding: 20px; 
+            margin-top: 15px; 
+            border-radius: 8px; 
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+        }
+        .error-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .error-title { font-weight: 700; color: #0f172a; }
+        .error-tag { font-size: 12px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-weight: 500; }
+        
+        /* The requested dynamic hover delete button */
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        /* Changes color to a deeper red when hovered over */
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>LSAT Error Log</h2>
+    <div class="navbar">
+        <div class="logo">LSAT-Tracker</div>
+        <div class="nav-links">
+            <div class="nav-item active" id="nav-home" onclick="switchPage('home')">Home</div>
+            <div class="nav-item" id="nav-history" onclick="switchPage('history')">Logged Mistakes</div>
+        </div>
+    </div>
+
+    <div class="container">
         
-        <input type="text" id="ptNumber" placeholder="PrepTest & Section (e.g., PT 90, LR1)">
-        
-        <select id="qType">
-            <option value="Flaw">Flaw in the Reasoning</option>
-            <option value="Necessary Assumption">Necessary Assumption</option>
-            <option value="Sufficient Assumption">Sufficient Assumption</option>
-            <option value="Strengthen/Weaken">Strengthen / Weaken</option>
-        </select>
-        
-        <textarea id="journal" placeholder="Why did you miss it? What was the trap?"></textarea>
-        
-        <button onclick="logError()">Save Error</button>
-        
-        <hr style="margin-top: 20px; border: 0; border-top: 1px solid #eee;">
-        <h3>Logged Mistakes:</h3>
-        <div id="errorList"></div>
+        <div id="page-home" class="page active">
+            <div class="card">
+                <h2>Log a New Mistake</h2>
+                
+                <label>PrepTest & Section</label>
+                <input type="text" id="ptNumber" placeholder="e.g., PT 90, LR1">
+                
+                <label>Question Type</label>
+                <select id="qType">
+                    <option value="Flaw">Flaw in the Reasoning</option>
+                    <option value="Necessary Assumption">Necessary Assumption</option>
+                    <option value="Sufficient Assumption">Sufficient Assumption</option>
+                    <option value="Strengthen/Weaken">Strengthen / Weaken</option>
+                </select>
+                
+                <label>Analysis Journal</label>
+                <textarea id="journal" rows="4" placeholder="Why did you miss it? What was the trap?"></textarea>
+                
+                <button class="save-btn" onclick="logError()">Save Error</button>
+            </div>
+        </div>
+
+        <div id="page-history" class="page">
+            <h2>Your Logged Mistakes</h2>
+            <div id="errorList"><em>No errors logged yet. Master your logic inputs on the home tab!</em></div>
+        </div>
+
     </div>
 
     <script>
-        // 1. Instead of starting with an empty array [], check if we have saved data in the browser first!
-        // If we do, parse it from text back into an array. If we don't, start fresh with [].
+        // Load existing database array from browser disk memory
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
 
-        // Run this immediately on page load so your old errors appear right away
+        // Initial setup execution
         displayErrors();
+
+        // SUBPAGE NAVIGATION ROUTER FUNCTION
+        function switchPage(pageName) {
+            // 1. Hide both page container boxes completely
+            document.getElementById('page-home').classList.remove('active');
+            document.getElementById('page-history').classList.remove('active');
+            
+            // 2. Remove the dark active pill style from both nav menu options
+            document.getElementById('nav-home').classList.remove('active');
+            document.getElementById('nav-history').classList.remove('active');
+            
+            // 3. Make the selected page container block visible and highlight its tab button
+            document.getElementById('page-' + pageName).classList.add('active');
+            document.getElementById('nav-' + pageName).classList.add('active');
+        }
 
         function logError() {
             const pt = document.getElementById('ptNumber').value;
@@ -53,27 +196,56 @@
                 return;
             }
 
-            const currentError = { pt: pt, type: type, text: journalEntry };
+            // Generate a unique ID using timestamps so we know exactly which item to target for deletion
+            const currentError = { id: Date.now(), pt: pt, type: type, text: journalEntry };
             errorLedger.push(currentError);
 
-            // 2. THE KEY ADDITION: Save the updated array to localStorage
-            // Browser storage only accepts strings, so we stringify our array into text
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
 
             displayErrors();
 
+            // Reset UI inputs
             document.getElementById('ptNumber').value = '';
             document.getElementById('journal').value = '';
+            
+            // UX Bonus: Automatically slide them to the history view so they see their update instantly!
+            switchPage('history');
+        }
+
+        // DELETION LOGIC (Think of this like vector filtering or array cleanup)
+        function deleteError(idToDrop) {
+            // Keep only items that DO NOT match the ID we want to clear
+            errorLedger = errorLedger.filter(item => item.id !== idToDrop);
+            
+            // Rewrite the cleaned dataset array back to localStorage
+            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+            
+            // Rerender the updated list on screen
+            displayErrors();
         }
 
         function displayErrors() {
             const container = document.getElementById('errorList');
             container.innerHTML = ''; 
 
+            if (errorLedger.length === 0) {
+                container.innerHTML = '<em>No errors logged yet. Master your logic inputs on the home tab!</em>';
+                return;
+            }
+
             errorLedger.forEach(item => {
                 const element = document.createElement('div');
                 element.className = 'error-item';
-                element.innerHTML = `<strong>${item.pt} (${item.type})</strong><p style="margin: 5px 0 0 0;">${item.text}</p>`;
+                element.innerHTML = `
+                    <div class="error-header">
+                        <span class="error-title">${item.pt}</span>
+                        <span class="error-tag">${item.type}</span>
+                    </div>
+                    <p style="margin: 0 0 15px 0; color: #475569; line-height: 1.5; font-size: 15px;">${item.text}</p>
+                    <div style="text-align: right;">
+                        <button class="delete-btn" onclick="deleteError(${item.id})">Delete</button>
+                    </div>
+                `;
                 container.appendChild(element);
             });
         }
