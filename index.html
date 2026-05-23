@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSAT Error Tracker</title>
     <style>
-        /* Modern, Pixel-Perfect GradeSpec Clean Aesthetic */
+        /* GradeSpec Premium Aesthetic */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; 
             padding: 0; 
-            background: #f8fafc; 
-            color: #0f172a; 
+            background: #f4f6f8; /* Softer off-white background */
+            color: #1e293b; 
             -webkit-font-smoothing: antialiased;
         }
 
@@ -25,138 +25,170 @@
             border-bottom: 1px solid #e2e8f0;
         }
         .logo {
-            font-size: 22px;
-            font-weight: 700;
+            font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            font-size: 24px;
+            font-weight: 500;
             letter-spacing: -0.5px;
             color: #0f172a;
         }
-        .nav-links {
-            display: flex;
-            gap: 24px;
-        }
+        .nav-links { display: flex; gap: 24px; }
         .nav-item {
             font-size: 15px;
             font-weight: 500;
             color: #64748b;
             cursor: pointer;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.2s ease;
         }
-        .nav-item.active {
-            background: #0f172a;
-            color: white;
-        }
-        .nav-item:hover:not(.active) {
-            color: #0f172a;
-            background: #f1f5f9;
-        }
+        .nav-item.active { background: #0f172a; color: white; }
+        .nav-item:hover:not(.active) { color: #0f172a; background: #f1f5f9; }
 
         /* MAIN APP LAYOUT CONTAINER */
         .container {
-            max-width: 700px;
+            max-width: 750px;
             margin: 50px auto;
             padding: 0 25px;
-        }
-        .card { 
-            background: white; 
-            padding: 35px; 
-            border-radius: 12px; 
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.01); 
         }
         
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Form Controls */
-        h2 { margin-top: 0; margin-bottom: 25px; font-size: 26px; font-weight: 700; letter-spacing: -0.6px; }
-        label { display: block; font-weight: 600; margin-top: 20px; margin-bottom: 6px; font-size: 14px; color: #334155; }
-        input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #ffffff; color: #0f172a; transition: all 0.15s ease; }
-        input:focus, select:focus, textarea:focus { outline: 2px solid #0f172a; border-color: transparent; }
+        /* GradeSpec Typography & Card Styling */
+        h2 { 
+            font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+            margin-top: 0; 
+            margin-bottom: 30px; 
+            font-size: 32px; 
+            font-weight: 400; 
+            letter-spacing: -0.5px; 
+            color: #0f172a;
+        }
         
-        /* Disabled Input State */
-        select:disabled {
-            background: #f1f5f9;
-            color: #94a3b8;
-            border-color: #e2e8f0;
-            cursor: not-allowed;
+        .card { 
+            background: white; 
+            padding: 35px 40px; 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
         }
 
-        /* Grid Framework for Side-by-Side Fields */
-        .input-grid {
-            display: flex;
-            gap: 16px;
+        /* Clean Form Controls */
+        label { display: block; font-weight: 600; margin-top: 20px; margin-bottom: 8px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Custom Dropdown & Input Styling */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            background: #ffffff; 
+            color: #0f172a; 
+            transition: all 0.2s ease; 
+            font-family: inherit;
         }
+        
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px top 50%;
+            background-size: 10px auto;
+        }
+
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        select:disabled { background-color: #f8fafc; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; background-image: none; }
+
+        .input-grid { display: flex; gap: 20px; }
         .grid-half { flex: 1; }
         
+        /* GradeSpec Navy Button */
         button.save-btn { 
-            width: 100%; padding: 14px; margin-top: 28px; border-radius: 8px; 
-            border: none; background: #2563eb; color: white; font-weight: 600; 
+            width: 100%; padding: 14px; margin-top: 32px; border-radius: 8px; 
+            border: none; background: #334155; color: white; font-weight: 600; 
             font-size: 15px; cursor: pointer; transition: background 0.2s; 
         }
-        button.save-btn:hover { background: #1d4ed8; }
+        button.save-btn:hover { background: #0f172a; }
 
         /* DATA RENDERING CARDS */
         .error-item { 
             background: white; 
             border: 1px solid #e2e8f0; 
             padding: 24px; 
-            margin-top: 16px; 
-            border-radius: 10px; 
+            margin-top: 20px; 
+            border-radius: 12px; 
             position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         .error-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
         }
-        .error-title { font-weight: 700; color: #0f172a; font-size: 17px; letter-spacing: -0.3px; }
+        .error-title { font-weight: 700; color: #0f172a; font-size: 18px; letter-spacing: -0.3px; }
         .tags-container { display: flex; gap: 8px; align-items: center; }
-        .error-tag { font-size: 12px; background: #f1f5f9; padding: 5px 10px; border-radius: 6px; font-weight: 600; color: #475569; }
-        .type-tag { background: #eff6ff; color: #1e40af; } 
         
-        /* New styling for the inline draft dropdown */
+        /* GradeSpec Style Pills */
+        .error-tag { font-size: 12px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #475569; }
+        .type-tag { background: #e0e7ff; color: #3730a3; } 
+        
+        /* Redesigned Draft Dropdown */
         .inline-select {
-            padding: 4px 8px;
+            padding: 6px 30px 6px 12px;
             font-size: 12px;
             font-weight: 600;
-            border-radius: 6px;
-            border: 1px solid #fef08a;
-            background: #fef9c3;
-            color: #854d0e;
+            border-radius: 20px;
+            border: 1px solid #fcd34d;
+            background-color: #fef3c7;
+            color: #92400e;
             cursor: pointer;
-            width: auto;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
         }
-        .inline-select:focus { outline: 2px solid #ca8a04; }
+        .inline-select:focus { box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.3); border-color: #f59e0b; }
 
-        .journal-text { margin: 0 0 16px 0; color: #475569; line-height: 1.6; font-size: 15px; }
-        .journal-empty { margin: 0 0 16px 0; color: #94a3b8; font-style: italic; font-size: 14px; }
+        /* INLINE EDITING STYLES */
+        .journal-wrapper {
+            padding: 12px;
+            margin: -12px -12px 16px -12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            cursor: text;
+        }
+        .journal-wrapper:hover { background: #f8fafc; }
+        .journal-text { margin: 0; color: #334155; line-height: 1.6; font-size: 15px; }
+        .journal-empty { margin: 0; color: #94a3b8; font-style: italic; font-size: 14px; }
+        
+        .edit-textarea { margin-bottom: 10px; }
+        .inline-save-btn {
+            background: #3b82f6; color: white; border: none; padding: 6px 12px;
+            border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;
+        }
+        .inline-save-btn:hover { background: #2563eb; }
 
         .delete-btn {
-            background: #fee2e2;
+            background: white;
             color: #ef4444;
-            border: none;
-            padding: 6px 14px;
+            border: 1px solid #fee2e2;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
             transition: all 0.2s ease;
         }
-        .delete-btn:hover {
-            background: #ef4444;
-            color: white;
-        }
+        .delete-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <div class="logo">LSAT-Tracker</div>
+        <div class="logo">LSAT Tracker</div>
         <div class="nav-links">
             <div class="nav-item active" id="nav-home" onclick="switchPage('home')">Home</div>
             <div class="nav-item" id="nav-history" onclick="switchPage('history')">Logged Mistakes</div>
@@ -190,15 +222,15 @@
                 <label>Question #(s)</label>
                 <input type="text" id="qNumber" placeholder="e.g., 14, 17, 21 (Use commas for bulk logging)">
                 
-                <label>Analytical Question Classification <span style="font-weight:400; color:#94a3b8;">(Leave blank to log as Draft)</span></label>
+                <label>Analytical Classification <span style="font-weight:400; color:#94a3b8; text-transform:none;">(Leave blank to log as Draft)</span></label>
                 <select id="qType" disabled>
                     <option value="">Select an Exam Section first...</option>
                 </select>
                 
-                <label>Analysis Journal & Structural Defect <span style="font-weight:400; color:#94a3b8;">(Optional)</span></label>
-                <textarea id="journal" rows="4"></textarea>
+                <label>Analysis Journal <span style="font-weight:400; color:#94a3b8; text-transform:none;">(Optional)</span></label>
+                <textarea id="journal" rows="4" placeholder="Deconstruct why you fell for the trap..."></textarea>
                 
-                <button class="save-btn" onclick="logError()">Save Error</button>
+                <button class="save-btn" onclick="logError()">Save Error Log</button>
             </div>
         </div>
 
@@ -257,11 +289,8 @@
         }
 
         function switchPage(pageName) {
-            document.getElementById('page-home').classList.remove('active');
-            document.getElementById('page-history').classList.remove('active');
-            document.getElementById('nav-home').classList.remove('active');
-            document.getElementById('nav-history').classList.remove('active');
-            
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('page-' + pageName).classList.add('active');
             document.getElementById('nav-' + pageName).classList.add('active');
         }
@@ -274,25 +303,22 @@
             const type = document.getElementById('qType').value;
             const journalEntry = document.getElementById('journal').value;
 
-            // Notice 'type' is no longer strictly required to pass validation
             if(!pt || !secNum || !qNumRaw || !section) {
                 alert("Please fill out PT, Section #, Exam Component, and Question #s to log data.");
                 return;
             }
 
-            // String Parsing: Split commas, remove extra spaces, and ignore empty chunks
             const qNumbers = qNumRaw.split(',').map(q => q.trim()).filter(q => q.length > 0);
 
-            // Create a distinct database entry for EVERY question number typed
             qNumbers.forEach(q => {
                 const currentError = { 
-                    id: Date.now() + Math.random(), // Math.random prevents identical IDs in rapid loops
+                    id: Date.now() + Math.random(), 
                     pt: pt, 
                     secNum: secNum,
                     qNum: q,
                     section: section,
                     type: type || 'Pending', 
-                    status: type ? 'Complete' : 'Draft', // Determines UI rendering state
+                    status: type ? 'Complete' : 'Draft', 
                     text: journalEntry.trim()
                 };
                 errorLedger.push(currentError);
@@ -301,27 +327,24 @@
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors();
 
-            // Reset inputs
             document.getElementById('ptNumber').value = '';
             document.getElementById('sectionNumber').value = '';
             document.getElementById('qNumber').value = '';
             document.getElementById('journal').value = '';
             document.getElementById('examSection').selectedIndex = 0;
-            
             document.getElementById('qType').disabled = true;
             document.getElementById('qType').innerHTML = '<option value="">Select an Exam Section first...</option>';
             
             switchPage('history');
         }
 
-        // Asynchronous Update Function: Fires when a dropdown in the History tab is changed
         function updateErrorType(id, newType) {
             const errorIndex = errorLedger.findIndex(item => item.id === id);
             if(errorIndex !== -1) {
                 errorLedger[errorIndex].type = newType;
                 errorLedger[errorIndex].status = 'Complete';
                 localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-                displayErrors(); // Re-render to swap the dropdown into a static blue tag
+                displayErrors(); 
             }
         }
 
@@ -329,6 +352,31 @@
             errorLedger = errorLedger.filter(item => item.id !== idToDrop);
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors();
+        }
+
+        // --- NEW INLINE EDITING LOGIC ---
+        function enableJournalEdit(id) {
+            const item = errorLedger.find(e => e.id === id);
+            const wrapper = document.getElementById(`journal-wrapper-${id}`);
+            
+            wrapper.removeAttribute('ondblclick');
+            wrapper.style.background = 'transparent';
+            
+            wrapper.innerHTML = `
+                <textarea id="edit-journal-${id}" class="edit-textarea" rows="3" placeholder="Add analysis...">${item.text || ''}</textarea>
+                <button class="inline-save-btn" onclick="saveJournalEdit(${id})">Save Analysis</button>
+            `;
+            document.getElementById(`edit-journal-${id}`).focus();
+        }
+
+        function saveJournalEdit(id) {
+            const newText = document.getElementById(`edit-journal-${id}`).value.trim();
+            const errorIndex = errorLedger.findIndex(e => e.id === id);
+            if(errorIndex !== -1) {
+                errorLedger[errorIndex].text = newText;
+                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+                displayErrors(); // Re-render to show static text again
+            }
         }
 
         function displayErrors() {
@@ -340,18 +388,16 @@
                 return;
             }
 
-            // Display errors (newest first for better UX)
             const reversedLedger = [...errorLedger].reverse();
 
             reversedLedger.forEach(item => {
                 const element = document.createElement('div');
                 element.className = 'error-item';
                 
-                // UX Logic: Render a blue tag if Complete, or a yellow dropdown if Draft
                 let typeHTML = '';
                 if (item.status === 'Draft') {
                     const optionsArray = item.section === 'Logical Reasoning' ? lrTypes : rcTypes;
-                    let optionsString = '<option value="" disabled selected>⚠️ Assign Type...</option>';
+                    let optionsString = '<option value="" disabled selected>Assign Type...</option>';
                     optionsArray.forEach(opt => {
                         optionsString += `<option value="${opt}">${opt}</option>`;
                     });
@@ -361,19 +407,24 @@
                     typeHTML = `<span class="error-tag type-tag">${item.type}</span>`;
                 }
 
-                const journalHTML = item.text 
+                // Inline edit wrapper with ondblclick trigger
+                const journalContent = item.text 
                     ? `<p class="journal-text">${item.text}</p>` 
-                    : `<p class="journal-empty">No analysis entry recorded for this error tracking parameter.</p>`;
+                    : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
 
                 element.innerHTML = `
                     <div class="error-header">
-                        <span class="error-title">${item.pt} — ${item.secNum} — ${item.qNum}</span>
+                        <span class="error-title">${item.pt} — ${item.secNum} — Q${item.qNum.replace('Q','')}</span>
                         <div class="tags-container">
                             <span class="error-tag">${item.section}</span>
                             ${typeHTML}
                         </div>
                     </div>
-                    ${journalHTML}
+                    
+                    <div id="journal-wrapper-${item.id}" class="journal-wrapper" ondblclick="enableJournalEdit(${item.id})" title="Double-click to edit">
+                        ${journalContent}
+                    </div>
+                    
                     <div style="text-align: right;">
                         <button class="delete-btn" onclick="deleteError(${item.id})">Delete</button>
                     </div>
