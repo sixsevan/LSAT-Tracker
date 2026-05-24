@@ -6,78 +6,19 @@
     <title>LSAT Error Tracker</title>
     <style>
         /* GradeSpec Premium Aesthetic */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: #f4f6f8; 
-            color: #1e293b; 
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* TOP NAVIGATION BAR */
-        .navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: white;
-            padding: 16px 40px;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo {
-            font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-            font-size: 24px;
-            font-weight: 500;
-            letter-spacing: -0.5px;
-            color: #0f172a;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background: #f4f6f8; color: #1e293b; -webkit-font-smoothing: antialiased; }
+        .navbar { display: flex; align-items: center; justify-content: space-between; background: white; padding: 16px 40px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .logo { font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; color: #0f172a; }
         .nav-links { display: flex; gap: 24px; }
-        .nav-item {
-            font-size: 15px;
-            font-weight: 500;
-            color: #64748b;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
+        .nav-item { font-size: 15px; font-weight: 500; color: #64748b; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s ease; }
         .nav-item.active { background: #0f172a; color: white; }
         .nav-item:hover:not(.active) { color: #0f172a; background: #f1f5f9; }
-
-        /* MAIN APP LAYOUT CONTAINER */
-        .container {
-            max-width: 750px;
-            margin: 50px auto;
-            padding: 0 25px;
-            padding-bottom: 100px;
-        }
-        
+        .container { max-width: 750px; margin: 50px auto; padding: 0 25px; padding-bottom: 100px; }
         .page { display: none; }
         .page.active { display: block; }
 
-        /* Typography & Card Styling */
-        h2 { 
-            font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-            margin-top: 0; 
-            margin-bottom: 30px; 
-            font-size: 32px; 
-            font-weight: 400; 
-            letter-spacing: -0.5px; 
-            color: #0f172a;
-        }
-        
-        .card { 
-            background: white; 
-            padding: 35px 40px; 
-            border-radius: 12px; 
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
-        }
-
-        /* Form Controls */
+        h2 { font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; margin-top: 0; margin-bottom: 30px; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; color: #0f172a; }
+        .card { background: white; padding: 35px 40px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); }
         label { display: block; font-weight: 600; margin-top: 20px; margin-bottom: 8px; font-size: 13px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
         input[type="text"], select, textarea { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 15px; background: #ffffff; color: #0f172a; transition: all 0.2s ease; font-family: inherit; }
         select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 14px top 50%; background-size: 10px auto; }
@@ -99,41 +40,28 @@
         .type-tag { background: #e0e7ff; color: #3730a3; } 
         .inline-select { padding: 6px 30px 6px 12px; font-size: 12px; font-weight: 600; border-radius: 20px; border: 1px dashed #94a3b8; background-color: #f8fafc; color: #475569; cursor: pointer; background-position: right 10px top 50%; background-size: 8px auto; transition: all 0.2s ease; }
         .inline-select:hover { border-style: solid; border-color: #64748b; background-color: #f1f5f9; }
-        
         .journal-wrapper { padding: 12px; margin: -12px -12px 16px -12px; border-radius: 8px; transition: background 0.2s; cursor: text; }
         .journal-wrapper:hover { background: #f8fafc; }
         .journal-text { margin: 0; color: #334155; line-height: 1.6; font-size: 15px; }
         .journal-empty { margin: 0; color: #94a3b8; font-style: italic; font-size: 14px; }
         .edit-textarea { margin-bottom: 10px; }
         .inline-save-btn { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
-        
         .delete-btn { background: white; color: #ef4444; border: 1px solid #fee2e2; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease; }
         .delete-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
-
         .bulk-action-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 16px 24px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .bulk-delete-btn { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; opacity: 0.5; pointer-events: none; transition: all 0.2s ease; }
         .bulk-delete-btn.active { opacity: 1; pointer-events: auto; }
-        .bulk-delete-btn.active:hover { background: #dc2626; }
 
-        /* --- NEW SUMMARY TAB STYLES --- */
+        /* Summary Tab & Score UI */
         .summary-pt-block { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .summary-pt-header { background: #0f172a; color: white; padding: 16px 24px; font-weight: 600; font-size: 18px; display: flex; justify-content: space-between; }
+        .summary-pt-header { background: #0f172a; color: white; padding: 16px 24px; font-weight: 600; font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
+        .score-badge { background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .warning-badge { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 500; }
         .summary-section-block { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
-        .summary-section-block:last-child { border-bottom: none; }
         .summary-section-title { font-weight: 700; font-size: 16px; color: #334155; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-        
         .question-pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
         .q-pill { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #475569; }
         .q-pill.draft { border-color: #fcd34d; background: #fef3c7; color: #92400e; }
-        
-        .resolver-banner { background: #eff6ff; border: 1px dashed #93c5fd; padding: 16px; border-radius: 8px; margin-top: 12px; }
-        .resolver-text { font-size: 13px; color: #1e40af; font-weight: 500; margin-bottom: 12px; line-height: 1.5; }
-        .resolver-buttons { display: flex; gap: 10px; }
-        .btn-resolve { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; border: 1px solid; transition: all 0.2s; }
-        .btn-resolve.base { background: #3b82f6; color: white; border-color: #2563eb; }
-        .btn-resolve.base:hover { background: #2563eb; }
-        .btn-resolve.exp { background: white; color: #3b82f6; border-color: #bfdbfe; }
-        .btn-resolve.exp:hover { background: #f0fdf4; border-color: #86efac; color: #166534; }
     </style>
 </head>
 <body>
@@ -153,14 +81,8 @@
             <div class="card">
                 <h2>Log a New Mistake</h2>
                 <div class="input-grid">
-                    <div class="grid-half">
-                        <label>PrepTest #</label>
-                        <input type="text" id="ptNumber" placeholder="e.g., 143">
-                    </div>
-                    <div class="grid-half">
-                        <label>Section #</label>
-                        <input type="text" id="sectionNumber" placeholder="e.g., Sec 1">
-                    </div>
+                    <div class="grid-half"><label>PrepTest #</label><input type="text" id="ptNumber" placeholder="e.g., 143"></div>
+                    <div class="grid-half"><label>Section #</label><input type="text" id="sectionNumber" placeholder="e.g., Sec 1"></div>
                 </div>
                 <label>Exam Section Component</label>
                 <select id="examSection" onchange="handleSectionChange()">
@@ -171,9 +93,7 @@
                 <label>Question #(s)</label>
                 <input type="text" id="qNumber" placeholder="e.g., 14, 17, 21 (Use commas for bulk logging)">
                 <label>Analytical Classification <span style="font-weight:400; color:#94a3b8; text-transform:none;">(Leave blank to log as Draft)</span></label>
-                <select id="qType" disabled>
-                    <option value="">Select an Exam Section first...</option>
-                </select>
+                <select id="qType" disabled><option value="">Select an Exam Section first...</option></select>
                 <label>Analysis Journal <span style="font-weight:400; color:#94a3b8; text-transform:none;">(Optional)</span></label>
                 <textarea id="journal" rows="4" placeholder="Deconstruct why you fell for the trap..."></textarea>
                 <button class="save-btn" onclick="logError()">Save Error Log</button>
@@ -193,10 +113,12 @@
         </div>
 
         <div id="page-summary" class="page">
-            <h2>Performance Summary</h2>
-            <p style="color: #64748b; margin-top: -20px; margin-bottom: 30px; font-size: 15px;">
-                Review your macro-level analytics. Resolve LawHub section collisions here to perfectly route your explanation links.
-            </p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <div>
+                    <h2>Performance Summary</h2>
+                    <p style="color: #64748b; margin-top: -20px; font-size: 15px;">Review your analytics and view accurate scaled score projections.</p>
+                </div>
+            </div>
             <div id="summaryContainer"></div>
         </div>
 
@@ -229,14 +151,15 @@
             "101": { base: "24", exp: "19" }
         };
 
+        // Standard modern LSAT approximation curve (Missed questions mapped to scaled score)
+        const scoreCurve = [180, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140];
+
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
         let selectedIds = new Set();
         
-        // Initialize App
-        displayErrors();
-        renderSummary();
+        displayErrors(); renderSummary();
 
-        // ------------------ ROUTING & LOGGING ------------------
+        // ROUTING & LOGGING
         function switchPage(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -252,16 +175,9 @@
             const chosenSection = sectionSelector.value;
             typeSelector.innerHTML = '<option value="">-- Select Type (or leave blank) --</option>';
 
-            if (chosenSection === "Logical Reasoning") {
-                typeSelector.disabled = false;
-                lrTypes.forEach(type => { let opt = document.createElement('option'); opt.value = type; opt.textContent = type; typeSelector.appendChild(opt); });
-            } else if (chosenSection === "Reading Comprehension") {
-                typeSelector.disabled = false;
-                rcTypes.forEach(type => { let opt = document.createElement('option'); opt.value = type; opt.textContent = type; typeSelector.appendChild(opt); });
-            } else {
-                typeSelector.disabled = true;
-                typeSelector.innerHTML = '<option value="">Select an Exam Section first...</option>';
-            }
+            if (chosenSection === "Logical Reasoning") { typeSelector.disabled = false; lrTypes.forEach(type => { let opt = document.createElement('option'); opt.value = type; opt.textContent = type; typeSelector.appendChild(opt); }); } 
+            else if (chosenSection === "Reading Comprehension") { typeSelector.disabled = false; rcTypes.forEach(type => { let opt = document.createElement('option'); opt.value = type; opt.textContent = type; typeSelector.appendChild(opt); }); } 
+            else { typeSelector.disabled = true; typeSelector.innerHTML = '<option value="">Select an Exam Section first...</option>'; }
         }
 
         function logError() {
@@ -272,47 +188,38 @@
             const type = document.getElementById('qType').value;
             const journalEntry = document.getElementById('journal').value;
 
-            if(!pt || !secNum || !qNumRaw || !section) { alert("Please fill out PT, Section #, Exam Component, and Question #s to log data."); return; }
-
-            const cleanPT = pt.replace(/[^0-9]/g, ''); // standardize PT code immediately
+            if(!pt || !secNum || !qNumRaw || !section) { alert("Please fill out PT, Section #, Exam Component, and Question #s."); return; }
+            const cleanPT = pt.replace(/[^0-9]/g, ''); 
             const qNumbers = qNumRaw.split(',').map(q => q.trim()).filter(q => q.length > 0);
 
             qNumbers.forEach(q => {
-                const currentError = { 
-                    id: Date.now() + Math.random(), 
-                    pt: cleanPT, 
-                    secNum: secNum,
-                    qNum: q.replace('Q', '').trim(),
-                    section: section,
-                    type: type || 'Pending', 
-                    status: type ? 'Complete' : 'Draft', 
-                    text: journalEntry.trim(),
-                    lrOrigin: null // New attribute for the Batch Resolver
-                };
-                errorLedger.push(currentError);
+                errorLedger.push({ 
+                    id: Date.now() + Math.random(), pt: cleanPT, secNum: secNum, qNum: q.replace('Q', '').trim(), section: section,
+                    type: type || 'Pending', status: type ? 'Complete' : 'Draft', text: journalEntry.trim(), lrOrigin: null 
+                });
             });
             
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors();
-
-            document.getElementById('ptNumber').value = '';
-            document.getElementById('sectionNumber').value = '';
-            document.getElementById('qNumber').value = '';
-            document.getElementById('journal').value = '';
-            document.getElementById('examSection').selectedIndex = 0;
-            document.getElementById('qType').disabled = true;
-            document.getElementById('qType').innerHTML = '<option value="">Select an Exam Section first...</option>';
-            
-            switchPage('summary'); // Auto-route to summary to check for collisions
+            document.getElementById('ptNumber').value = ''; document.getElementById('sectionNumber').value = ''; document.getElementById('qNumber').value = ''; document.getElementById('journal').value = ''; document.getElementById('examSection').selectedIndex = 0; document.getElementById('qType').disabled = true;
+            switchPage('history'); 
         }
 
-        // ------------------ DYNAMIC URL GENERATOR ------------------
+        // BATCH RESOLVER (Called from Summary OR History Tabs)
+        function batchResolve(pt, secNum, originCode) {
+            errorLedger.forEach(err => { if (err.pt === pt && err.secNum === secNum && err.section === "Logical Reasoning") err.lrOrigin = originCode; });
+            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+            displayErrors(); renderSummary(); 
+        }
+
+        // DYNAMIC URL GENERATOR & INLINE RESOLVER
         function generateExplanationButtons(item) {
             const ptData = ptDictionary[item.pt];
-            const btnStyle = "text-decoration: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; display: inline-block; white-space: nowrap;";
+            const btnStyle = "text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; display: inline-block;";
             const primaryBtn = `${btnStyle} background: #f8fafc; color: #3b82f6; border: 1px solid #bfdbfe;`;
-            const secondaryBtn = `${btnStyle} background: #fffbeb; color: #d97706; border: 1px solid #fde68a;`;
             const resolvedBtn = `${btnStyle} background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;`;
+            const actionBtnYes = "cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #22c55e; color: white; border: none; transition: background 0.2s;";
+            const actionBtnNo = "cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #ef4444; color: white; border: none; transition: background 0.2s;";
 
             if (!ptData) return `<a href="https://lsathacks.com/explanations/" target="_blank" style="${primaryBtn}">Find Explanation ↗</a>`;
 
@@ -320,87 +227,87 @@
                 return `<a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/reading-comprehension/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Read RC Explanation ↗</a>`;
             } 
             
-            // NEW LOGIC: If the user resolved the collision in the Summary Tab, render the perfect buttons
+            // If already resolved, display perfect single link
             if (item.lrOrigin === 'base') {
                 return `
                     <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Base LR1 ↗</a>
                     <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Base LR2 ↗</a>
                 `;
             } else if (item.lrOrigin === 'exp') {
-                // Many experimental sections map back to old tests that only had 1 LR converted over. We provide both folders just in case.
                 return `
                     <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Exp LR1 ↗</a>
                     <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Exp LR2 ↗</a>
                 `;
             }
 
-            // Fallback: If not yet resolved, show the 4 brute-force buttons
+            // SMART ROUTING UI: Inline Resolution directly in History Tab
             return `
-                <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${primaryBtn}" title="Base PT ${ptData.base}">Base LR1 ↗</a>
-                <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${primaryBtn}" title="Base PT ${ptData.base}">Base LR2 ↗</a>
-                <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${secondaryBtn}" title="Exp PT ${ptData.exp}">Exp LR1 ↗</a>
-                <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${secondaryBtn}" title="Exp PT ${ptData.exp}">Exp LR2 ↗</a>
+                <div style="display:flex; align-items:center; gap:8px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                    <span style="font-size:12px; font-weight:600; color:#475569;">Is it Base PT?</span>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Try LR1 ↗</a>
+                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Try LR2 ↗</a>
+                    <div style="border-left: 1px solid #cbd5e1; height: 20px; margin: 0 4px;"></div>
+                    <button onclick="batchResolve('${item.pt}', '${item.secNum}', 'base')" style="${actionBtnYes}" title="Set entire section as Base">✓ Yes</button>
+                    <button onclick="batchResolve('${item.pt}', '${item.secNum}', 'exp')" style="${actionBtnNo}" title="Set entire section as Experimental">✗ No, it's Exp</button>
+                </div>
             `;
         }
 
-        // ------------------ NEW: PERFORMANCE SUMMARY LOGIC ------------------
+        // DYNAMIC SCORE CALCULATOR & SUMMARY ENGINE
         function renderSummary() {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
+            if (errorLedger.length === 0) { container.innerHTML = '<div class="card" style="text-align:center; color:#64748b;">No data logged yet. Complete a test and log your errors to view projections.</div>'; return; }
 
-            if (errorLedger.length === 0) {
-                container.innerHTML = '<div class="card" style="text-align:center; color:#64748b;">No data logged yet. Complete a section and log your errors to generate your dashboard.</div>';
-                return;
-            }
-
-            // 1. Group Data: PT -> Section -> Questions
             const groupedData = {};
             errorLedger.forEach(err => {
                 if (!groupedData[err.pt]) groupedData[err.pt] = {};
-                if (!groupedData[err.pt][err.secNum]) {
-                    groupedData[err.pt][err.secNum] = { sectionType: err.section, errors: [], resolvedOrigin: null };
-                }
+                if (!groupedData[err.pt][err.secNum]) { groupedData[err.pt][err.secNum] = { sectionType: err.section, errors: [], resolvedOrigin: null }; }
                 groupedData[err.pt][err.secNum].errors.push(err);
-                
-                // If any error in this section has an origin stamped, the section is resolved
                 if (err.lrOrigin) groupedData[err.pt][err.secNum].resolvedOrigin = err.lrOrigin;
             });
 
-            // 2. Render HTML grouped by PT
             Object.keys(groupedData).sort((a,b) => b-a).forEach(ptNum => {
-                const ptDataDict = ptDictionary[ptNum]; // Get the translation info
+                let totalScoredMistakes = 0;
+                let hasUnresolved = false;
+                let uniqueSections = Object.keys(groupedData[ptNum]).length;
+
+                // MATH: Filter out experimental mistakes to find true raw score
+                Object.values(groupedData[ptNum]).forEach(sec => {
+                    if (sec.sectionType === 'Reading Comprehension') totalScoredMistakes += sec.errors.length;
+                    else if (sec.sectionType === 'Logical Reasoning') {
+                        if (sec.resolvedOrigin === 'base') totalScoredMistakes += sec.errors.length;
+                        else if (!sec.resolvedOrigin) hasUnresolved = true; // Wait for user to resolve
+                    }
+                });
+
+                let estScore = totalScoredMistakes < scoreCurve.length ? scoreCurve[totalScoredMistakes] : '< 140';
                 
+                // Show badge logic: only display score if they've resolved LR sections
+                let scoreBadgeHTML = hasUnresolved 
+                    ? `<span class="warning-badge">⚠️ Resolve LR to unlock Projected Score</span>` 
+                    : `<span class="score-badge" title="Assumes all 3 scored sections are completely logged.">Projected Score: ${estScore}</span>`;
+
                 let ptHTML = `
                     <div class="summary-pt-block">
                         <div class="summary-pt-header">
                             <span>PrepTest ${ptNum}</span>
-                            <span style="font-size: 14px; font-weight: 500; opacity: 0.8;">Total Errors: ${Object.values(groupedData[ptNum]).flat().reduce((acc, curr) => acc + curr.errors.length, 0)}</span>
+                            <div style="display:flex; align-items:center; gap: 16px;">
+                                ${scoreBadgeHTML}
+                                <span style="font-size: 14px; font-weight: 500; opacity: 0.8;">Total Logged: ${Object.values(groupedData[ptNum]).flat().reduce((acc, curr) => acc + curr.errors.length, 0)}</span>
+                            </div>
                         </div>
                 `;
 
                 Object.keys(groupedData[ptNum]).sort().forEach(secNum => {
                     const sec = groupedData[ptNum][secNum];
+                    let questionsHTML = sec.errors.map(err => `<span class="q-pill ${err.status === 'Draft' ? 'draft' : ''}">Q${err.qNum}</span>`).join('');
                     
-                    let questionsHTML = sec.errors.map(err => {
-                        let classMod = err.status === 'Draft' ? 'draft' : '';
-                        return `<span class="q-pill ${classMod}">Q${err.qNum}</span>`;
-                    }).join('');
-
-                    // The Brilliance: The Batch Resolver UI
-                    let resolverHTML = '';
-                    if (sec.sectionType === "Logical Reasoning" && ptDataDict && !sec.resolvedOrigin) {
-                        resolverHTML = `
-                            <div class="resolver-banner">
-                                <div class="resolver-text">⚠️ <strong>LawHub Collision Detected.</strong> Which original test did this LR section belong to?</div>
-                                <div class="resolver-buttons">
-                                    <button class="btn-resolve base" onclick="batchResolve('${ptNum}', '${secNum}', 'base')">Base PT (${ptDataDict.base})</button>
-                                    <button class="btn-resolve exp" onclick="batchResolve('${ptNum}', '${secNum}', 'exp')">Experimental PT (${ptDataDict.exp})</button>
-                                </div>
-                            </div>
-                        `;
-                    } else if (sec.sectionType === "Logical Reasoning" && sec.resolvedOrigin) {
-                        const resolvedLabel = sec.resolvedOrigin === 'base' ? `Base PT (${ptDataDict.base})` : `Exp PT (${ptDataDict.exp})`;
-                        resolverHTML = `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">✓ Resolved to: ${resolvedLabel}</div>`;
+                    let originLabel = '';
+                    if (sec.sectionType === "Logical Reasoning" && sec.resolvedOrigin) {
+                        originLabel = `<span style="font-size: 12px; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">✓ ${sec.resolvedOrigin === 'base' ? 'Scored Base' : 'Unscored Exp'}</span>`;
+                    } else if (sec.sectionType === "Logical Reasoning" && !sec.resolvedOrigin) {
+                        originLabel = `<span style="font-size: 12px; color: #d97706; background: #fffbeb; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">⚠️ Unresolved Origin</span>`;
                     }
 
                     ptHTML += `
@@ -409,107 +316,39 @@
                                 <span class="error-tag ${sec.sectionType === 'Reading Comprehension' ? '' : 'type-tag'}">${sec.sectionType}</span>
                                 <span>${secNum}</span>
                                 <span style="color:#94a3b8; font-weight:500; font-size:14px;">(${sec.errors.length} Mistakes)</span>
+                                ${originLabel}
                             </div>
                             <div class="question-pill-container">${questionsHTML}</div>
-                            ${resolverHTML}
                         </div>
                     `;
                 });
-
-                ptHTML += `</div>`;
-                container.innerHTML += ptHTML;
+                ptHTML += `</div>`; container.innerHTML += ptHTML;
             });
         }
 
-        // 3. The Action Function: Stamps all questions in a section with the origin
-        function batchResolve(pt, secNum, originCode) {
-            errorLedger.forEach(err => {
-                if (err.pt === pt && err.secNum === secNum && err.section === "Logical Reasoning") {
-                    err.lrOrigin = originCode;
-                }
-            });
-            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-            renderSummary(); // Re-render this page to hide the banner
-            displayErrors(); // Quietly update the History tab buttons in the background
-        }
-
-        // ------------------ STANDARD HISTORY LOGIC ------------------
-        function updateErrorType(id, newType) {
-            const errorIndex = errorLedger.findIndex(item => item.id === id);
-            if(errorIndex !== -1) {
-                errorLedger[errorIndex].type = newType;
-                errorLedger[errorIndex].status = 'Complete';
-                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-                displayErrors(); renderSummary();
-            }
-        }
-
-        function deleteError(idToDrop) {
-            if(confirm("Are you sure you want to permanently delete this log?")) {
-                errorLedger = errorLedger.filter(item => item.id !== idToDrop);
-                selectedIds.delete(idToDrop); 
-                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-                displayErrors(); renderSummary();
-            }
-        }
-
+        // STANDARD DATA & EDIT LOGIC
+        function updateErrorType(id, newType) { const errorIndex = errorLedger.findIndex(item => item.id === id); if(errorIndex !== -1) { errorLedger[errorIndex].type = newType; errorLedger[errorIndex].status = 'Complete'; localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); renderSummary(); } }
+        function deleteError(idToDrop) { if(confirm("Permanently delete this log?")) { errorLedger = errorLedger.filter(item => item.id !== idToDrop); selectedIds.delete(idToDrop); localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); renderSummary(); } }
         function toggleSelect(checkbox, id) { if (checkbox.checked) selectedIds.add(id); else selectedIds.delete(id); updateBulkUI(); }
         function toggleSelectAll(checkbox) { if (checkbox.checked) { errorLedger.forEach(item => selectedIds.add(item.id)); } else { selectedIds.clear(); } displayErrors(); }
-        
-        function deleteSelected() {
-            if (selectedIds.size === 0) return;
-            if (confirm(`Are you sure you want to permanently delete ${selectedIds.size} logged mistake(s)?`)) {
-                errorLedger = errorLedger.filter(item => !selectedIds.has(item.id));
-                selectedIds.clear();
-                localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
-                displayErrors(); renderSummary();
-            }
-        }
-
-        function updateBulkUI() {
-            const btn = document.getElementById('bulkDeleteBtn');
-            const countText = document.getElementById('selectedCountText');
-            if (selectedIds.size > 0) { btn.classList.add('active'); countText.innerText = `${selectedIds.size} selected`; btn.innerText = `Delete (${selectedIds.size})`; } 
-            else { btn.classList.remove('active'); countText.innerText = `Select All`; btn.innerText = `Delete Selected`; }
-        }
-
-        function enableJournalEdit(id) {
-            const item = errorLedger.find(e => e.id === id);
-            const wrapper = document.getElementById(`journal-wrapper-${id}`);
-            wrapper.removeAttribute('ondblclick'); wrapper.style.background = 'transparent';
-            wrapper.innerHTML = `<textarea id="edit-journal-${id}" class="edit-textarea" rows="3" placeholder="Add analysis...">${item.text || ''}</textarea><button class="inline-save-btn" onclick="saveJournalEdit(${id})">Save Analysis</button>`;
-            document.getElementById(`edit-journal-${id}`).focus();
-        }
-
-        function saveJournalEdit(id) {
-            const newText = document.getElementById(`edit-journal-${id}`).value.trim();
-            const errorIndex = errorLedger.findIndex(e => e.id === id);
-            if(errorIndex !== -1) { errorLedger[errorIndex].text = newText; localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); }
-        }
+        function deleteSelected() { if (selectedIds.size === 0) return; if (confirm(`Delete ${selectedIds.size} mistakes?`)) { errorLedger = errorLedger.filter(item => !selectedIds.has(item.id)); selectedIds.clear(); localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); renderSummary(); } }
+        function updateBulkUI() { const btn = document.getElementById('bulkDeleteBtn'); const countText = document.getElementById('selectedCountText'); if (selectedIds.size > 0) { btn.classList.add('active'); countText.innerText = `${selectedIds.size} selected`; btn.innerText = `Delete (${selectedIds.size})`; } else { btn.classList.remove('active'); countText.innerText = `Select All`; btn.innerText = `Delete Selected`; } }
+        function enableJournalEdit(id) { const item = errorLedger.find(e => e.id === id); const wrapper = document.getElementById(`journal-wrapper-${id}`); wrapper.removeAttribute('ondblclick'); wrapper.style.background = 'transparent'; wrapper.innerHTML = `<textarea id="edit-journal-${id}" class="edit-textarea" rows="3" placeholder="Add analysis...">${item.text || ''}</textarea><button class="inline-save-btn" onclick="saveJournalEdit(${id})">Save Analysis</button>`; document.getElementById(`edit-journal-${id}`).focus(); }
+        function saveJournalEdit(id) { const newText = document.getElementById(`edit-journal-${id}`).value.trim(); const errorIndex = errorLedger.findIndex(e => e.id === id); if(errorIndex !== -1) { errorLedger[errorIndex].text = newText; localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); } }
 
         function displayErrors() {
-            const container = document.getElementById('errorList');
-            const bulkBar = document.getElementById('bulkActionBar');
-            container.innerHTML = ''; 
-
+            const container = document.getElementById('errorList'); const bulkBar = document.getElementById('bulkActionBar'); container.innerHTML = ''; 
             if (errorLedger.length === 0) { container.innerHTML = '<em>No errors logged yet. Master your logic inputs on the home tab!</em>'; bulkBar.style.display = 'none'; return; }
-
             bulkBar.style.display = 'flex'; updateBulkUI(); 
             const reversedLedger = [...errorLedger].reverse();
 
             reversedLedger.forEach(item => {
-                const element = document.createElement('div');
-                element.className = 'error-item';
-                
+                const element = document.createElement('div'); element.className = 'error-item';
                 let typeHTML = '';
                 if (item.status === 'Draft') {
-                    const optionsArray = item.section === 'Logical Reasoning' ? lrTypes : rcTypes;
-                    let optionsString = '<option value="" disabled selected>Assign Type...</option>';
-                    optionsArray.forEach(opt => { optionsString += `<option value="${opt}">${opt}</option>`; });
+                    const optionsArray = item.section === 'Logical Reasoning' ? lrTypes : rcTypes; let optionsString = '<option value="" disabled selected>Assign Type...</option>'; optionsArray.forEach(opt => { optionsString += `<option value="${opt}">${opt}</option>`; });
                     typeHTML = `<select class="inline-select" onchange="updateErrorType(${item.id}, this.value)">${optionsString}</select>`;
-                } else {
-                    typeHTML = `<span class="error-tag type-tag">${item.type}</span>`;
-                }
+                } else { typeHTML = `<span class="error-tag type-tag">${item.type}</span>`; }
 
                 const journalContent = item.text ? `<p class="journal-text">${item.text}</p>` : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
                 const isChecked = selectedIds.has(item.id) ? 'checked' : '';
