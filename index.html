@@ -55,6 +55,11 @@
         /* Summary Tab & Score UI */
         .summary-pt-block { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .summary-pt-header { background: #0f172a; color: white; padding: 16px 24px; font-weight: 600; font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* NEW: PrepTest Menu Link Button */
+        .pt-link-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s ease; margin-left: 15px; }
+        .pt-link-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
+
         .score-badge { background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .warning-badge { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 500; }
         .summary-section-block { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
@@ -62,6 +67,15 @@
         .question-pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
         .q-pill { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #475569; }
         .q-pill.draft { border-color: #fcd34d; background: #fef3c7; color: #92400e; }
+        
+        .resolver-banner { background: #eff6ff; border: 1px dashed #93c5fd; padding: 16px; border-radius: 8px; margin-top: 12px; }
+        .resolver-text { font-size: 13px; color: #1e40af; font-weight: 500; margin-bottom: 12px; line-height: 1.5; }
+        .resolver-buttons { display: flex; gap: 10px; }
+        .btn-resolve { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; border: 1px solid; transition: all 0.2s; }
+        .btn-resolve.base { background: #3b82f6; color: white; border-color: #2563eb; }
+        .btn-resolve.base:hover { background: #2563eb; }
+        .btn-resolve.exp { background: white; color: #3b82f6; border-color: #bfdbfe; }
+        .btn-resolve.exp:hover { background: #f0fdf4; border-color: #86efac; color: #166534; }
     </style>
 </head>
 <body>
@@ -81,7 +95,7 @@
             <div class="card">
                 <h2>Log a New Mistake</h2>
                 <div class="input-grid">
-                    <div class="grid-half"><label>PrepTest #</label><input type="text" id="ptNumber" placeholder="e.g., 143"></div>
+                    <div class="grid-half"><label>PrepTest #</label><input type="text" id="ptNumber" placeholder="e.g., 140"></div>
                     <div class="grid-half"><label>Section #</label><input type="text" id="sectionNumber" placeholder="e.g., Sec 1"></div>
                 </div>
                 <label>Exam Section Component</label>
@@ -116,7 +130,7 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                 <div>
                     <h2>Performance Summary</h2>
-                    <p style="color: #64748b; margin-top: -20px; font-size: 15px;">Review your analytics and view accurate scaled score projections.</p>
+                    <p style="color: #64748b; margin-top: -20px; font-size: 15px;">Review your analytics, access PT explanations, and view scaled score projections.</p>
                 </div>
             </div>
             <div id="summaryContainer"></div>
@@ -128,6 +142,7 @@
         const lrTypes = ["Assumptions", "Conclusions and Disputes", "Deductions and Inference", "Explain or Resolve", "Flaws", "Matching Flaws", "Matching Structure and Principles", "Strengthen or Weaken", "Techniques, Roles, and Principles"];
         const rcTypes = ["Analyzing how the Parts Work", "Applying the Argument to New Contexts", "Author's Attitude", "Drawing Inferences", "Identifying Main Points and Primary Purposes", "Meaning in Context", "Recognizing Elements of the Passage"];
 
+        // Kept for accurate Scored vs Experimental calculation
         const ptDictionary = {
             "158": { base: "90", exp: "91" }, "157": { base: "93", exp: "91" }, "156": { base: "94", exp: "92" },
             "155": { base: "89", exp: "92" }, "154": { base: "88", exp: "82" }, "153": { base: "87", exp: "82" },
@@ -151,7 +166,6 @@
             "101": { base: "24", exp: "19" }
         };
 
-        // Standard modern LSAT approximation curve (Missed questions mapped to scaled score)
         const scoreCurve = [180, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140];
 
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
@@ -159,7 +173,6 @@
         
         displayErrors(); renderSummary();
 
-        // ROUTING & LOGGING
         function switchPage(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -205,55 +218,13 @@
             switchPage('history'); 
         }
 
-        // BATCH RESOLVER (Called from Summary OR History Tabs)
+        // BATCH RESOLVER: Kept for accurate Score Estimations
         function batchResolve(pt, secNum, originCode) {
             errorLedger.forEach(err => { if (err.pt === pt && err.secNum === secNum && err.section === "Logical Reasoning") err.lrOrigin = originCode; });
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors(); renderSummary(); 
         }
 
-        // DYNAMIC URL GENERATOR & INLINE RESOLVER
-        function generateExplanationButtons(item) {
-            const ptData = ptDictionary[item.pt];
-            const btnStyle = "text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; display: inline-block;";
-            const primaryBtn = `${btnStyle} background: #f8fafc; color: #3b82f6; border: 1px solid #bfdbfe;`;
-            const resolvedBtn = `${btnStyle} background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;`;
-            const actionBtnYes = "cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #22c55e; color: white; border: none; transition: background 0.2s;";
-            const actionBtnNo = "cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #ef4444; color: white; border: none; transition: background 0.2s;";
-
-            if (!ptData) return `<a href="https://lsathacks.com/explanations/" target="_blank" style="${primaryBtn}">Find Explanation ↗</a>`;
-
-            if (item.section === "Reading Comprehension") {
-                return `<a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/reading-comprehension/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Read RC Explanation ↗</a>`;
-            } 
-            
-            // If already resolved, display perfect single link
-            if (item.lrOrigin === 'base') {
-                return `
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Base LR1 ↗</a>
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Base LR2 ↗</a>
-                `;
-            } else if (item.lrOrigin === 'exp') {
-                return `
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Exp LR1 ↗</a>
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.exp}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${resolvedBtn}">Exp LR2 ↗</a>
-                `;
-            }
-
-            // SMART ROUTING UI: Inline Resolution directly in History Tab
-            return `
-                <div style="display:flex; align-items:center; gap:8px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                    <span style="font-size:12px; font-weight:600; color:#475569;">Is it Base PT?</span>
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-1/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Try LR1 ↗</a>
-                    <a href="https://lsathacks.com/explanations/lsat-preptest-${ptData.base}/logical-reasoning-2/q-${item.qNum}/" target="_blank" style="${primaryBtn}">Try LR2 ↗</a>
-                    <div style="border-left: 1px solid #cbd5e1; height: 20px; margin: 0 4px;"></div>
-                    <button onclick="batchResolve('${item.pt}', '${item.secNum}', 'base')" style="${actionBtnYes}" title="Set entire section as Base">✓ Yes</button>
-                    <button onclick="batchResolve('${item.pt}', '${item.secNum}', 'exp')" style="${actionBtnNo}" title="Set entire section as Experimental">✗ No, it's Exp</button>
-                </div>
-            `;
-        }
-
-        // DYNAMIC SCORE CALCULATOR & SUMMARY ENGINE
         function renderSummary() {
             const container = document.getElementById('summaryContainer');
             container.innerHTML = '';
@@ -270,20 +241,18 @@
             Object.keys(groupedData).sort((a,b) => b-a).forEach(ptNum => {
                 let totalScoredMistakes = 0;
                 let hasUnresolved = false;
-                let uniqueSections = Object.keys(groupedData[ptNum]).length;
+                const ptDataDict = ptDictionary[ptNum];
 
-                // MATH: Filter out experimental mistakes to find true raw score
                 Object.values(groupedData[ptNum]).forEach(sec => {
                     if (sec.sectionType === 'Reading Comprehension') totalScoredMistakes += sec.errors.length;
                     else if (sec.sectionType === 'Logical Reasoning') {
                         if (sec.resolvedOrigin === 'base') totalScoredMistakes += sec.errors.length;
-                        else if (!sec.resolvedOrigin) hasUnresolved = true; // Wait for user to resolve
+                        else if (!sec.resolvedOrigin) hasUnresolved = true; 
                     }
                 });
 
                 let estScore = totalScoredMistakes < scoreCurve.length ? scoreCurve[totalScoredMistakes] : '< 140';
                 
-                // Show badge logic: only display score if they've resolved LR sections
                 let scoreBadgeHTML = hasUnresolved 
                     ? `<span class="warning-badge">⚠️ Resolve LR to unlock Projected Score</span>` 
                     : `<span class="score-badge" title="Assumes all 3 scored sections are completely logged.">Projected Score: ${estScore}</span>`;
@@ -291,7 +260,10 @@
                 let ptHTML = `
                     <div class="summary-pt-block">
                         <div class="summary-pt-header">
-                            <span>PrepTest ${ptNum}</span>
+                            <div style="display:flex; align-items:center;">
+                                <span>PrepTest ${ptNum}</span>
+                                <a href="https://lsathacks.com/explanations/lsat-preptest-${ptNum}/" target="_blank" class="pt-link-btn">LSATHacks Menu ↗</a>
+                            </div>
                             <div style="display:flex; align-items:center; gap: 16px;">
                                 ${scoreBadgeHTML}
                                 <span style="font-size: 14px; font-weight: 500; opacity: 0.8;">Total Logged: ${Object.values(groupedData[ptNum]).flat().reduce((acc, curr) => acc + curr.errors.length, 0)}</span>
@@ -303,11 +275,19 @@
                     const sec = groupedData[ptNum][secNum];
                     let questionsHTML = sec.errors.map(err => `<span class="q-pill ${err.status === 'Draft' ? 'draft' : ''}">Q${err.qNum}</span>`).join('');
                     
-                    let originLabel = '';
-                    if (sec.sectionType === "Logical Reasoning" && sec.resolvedOrigin) {
-                        originLabel = `<span style="font-size: 12px; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">✓ ${sec.resolvedOrigin === 'base' ? 'Scored Base' : 'Unscored Exp'}</span>`;
-                    } else if (sec.sectionType === "Logical Reasoning" && !sec.resolvedOrigin) {
-                        originLabel = `<span style="font-size: 12px; color: #d97706; background: #fffbeb; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">⚠️ Unresolved Origin</span>`;
+                    let resolverHTML = '';
+                    if (sec.sectionType === "Logical Reasoning" && ptDataDict && !sec.resolvedOrigin) {
+                        resolverHTML = `
+                            <div class="resolver-banner">
+                                <div class="resolver-text">⚠️ <strong>Score Calibration Needed.</strong> Was this section Scored or Experimental?</div>
+                                <div class="resolver-buttons">
+                                    <button class="btn-resolve base" onclick="batchResolve('${ptNum}', '${secNum}', 'base')">It was Scored</button>
+                                    <button class="btn-resolve exp" onclick="batchResolve('${ptNum}', '${secNum}', 'exp')">It was Experimental</button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (sec.sectionType === "Logical Reasoning" && sec.resolvedOrigin) {
+                        resolverHTML = `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">✓ Tagged as: ${sec.resolvedOrigin === 'base' ? 'Scored' : 'Experimental'}</div>`;
                     }
 
                     ptHTML += `
@@ -316,9 +296,9 @@
                                 <span class="error-tag ${sec.sectionType === 'Reading Comprehension' ? '' : 'type-tag'}">${sec.sectionType}</span>
                                 <span>${secNum}</span>
                                 <span style="color:#94a3b8; font-weight:500; font-size:14px;">(${sec.errors.length} Mistakes)</span>
-                                ${originLabel}
                             </div>
                             <div class="question-pill-container">${questionsHTML}</div>
+                            ${resolverHTML}
                         </div>
                     `;
                 });
@@ -353,6 +333,7 @@
                 const journalContent = item.text ? `<p class="journal-text">${item.text}</p>` : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
                 const isChecked = selectedIds.has(item.id) ? 'checked' : '';
 
+                // HTML structure completely cleared of all explanation routing links
                 element.innerHTML = `
                     <div class="error-header">
                         <div class="checkbox-container">
@@ -362,8 +343,7 @@
                         <div class="tags-container"><span class="error-tag">${item.section}</span>${typeHTML}</div>
                     </div>
                     <div id="journal-wrapper-${item.id}" class="journal-wrapper" ondblclick="enableJournalEdit(${item.id})" title="Double-click to edit">${journalContent}</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                        <div style="display: flex; gap: 8px;">${generateExplanationButtons(item)}</div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
                         <button class="delete-btn" onclick="deleteError(${item.id})">Delete</button>
                     </div>
                 `;
