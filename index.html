@@ -201,7 +201,7 @@
 
         <div id="page-overviews" class="page">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                <div><h2>Test Overviews & Scoring</h2><p style="color: #64748b; margin-top: -20px; font-size: 15px;">Resolve LawHub section collisions to unlock scaled score estimates.</p></div>
+                <div><h2>Test Overviews & Scoring</h2><p style="color: #64748b; margin-top: -20px; font-size: 15px;">Establish test architecture to automatically resolve unscored collisions.</p></div>
             </div>
             <div id="summaryContainer"></div>
         </div>
@@ -257,9 +257,21 @@
         const scoreCurve = [180, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169, 168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154, 153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140];
 
         document.getElementById('ptDate').valueAsDate = new Date();
+        
+        // Load & Migrate Legacy Data Format
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
+        errorLedger.forEach(err => {
+            if (err.lrOrigin !== undefined) { err.sectionOrigin = err.lrOrigin; delete err.lrOrigin; }
+            if (err.expType === undefined) {
+                if (err.sectionOrigin) {
+                    err.expType = 'Logical Reasoning'; // Legacy data assumed LR was the collision
+                    if (err.section === 'Reading Comprehension') err.sectionOrigin = 'base';
+                } else { err.expType = null; }
+            }
+        });
+
         let selectedIds = new Set();
-        window.hasRenderedOnce = false; // Tracks first app load
+        window.hasRenderedOnce = false; 
         
         displayErrors(); renderSummary();
 
@@ -297,11 +309,21 @@
             const cleanPT = pt.replace(/[^0-9]/g, ''); 
             const qNumbers = qNumRaw.split(',').map(q => q.trim()).filter(q => q.length > 0);
 
+            // Fetch known PT architecture if it exists
+            let knownExpType = null;
+            let existingLog = errorLedger.find(e => e.pt === cleanPT && e.expType);
+            if (existingLog) knownExpType = existingLog.expType;
+
             qNumbers.forEach(q => {
-                errorLedger.push({ 
+                let newErr = { 
                     id: Date.now() + Math.random(), date: date, pt: cleanPT, secNum: secNum, qNum: q.replace('Q', '').trim(), section: section,
-                    type: type || 'Pending', difficulty: diff || 'Pending', status: (type && diff) ? 'Complete' : 'Draft', text: journalEntry.trim(), lrOrigin: null 
-                });
+                    type: type || 'Pending', difficulty: diff || 'Pending', status: (type && diff) ? 'Complete' : 'Draft', text: journalEntry.trim(), 
+                    sectionOrigin: null, expType: knownExpType 
+                };
+                
+                // Auto-resolve if PT architecture is known and section doesn't match the collision type
+                if (knownExpType && section !== knownExpType) { newErr.sectionOrigin = 'base'; }
+                errorLedger.push(newErr);
             });
             
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
@@ -310,8 +332,21 @@
             switchPage('history'); 
         }
 
+        // --- NEW TEST ARCHITECTURE RESOLVERS ---
+        function setPtStructure(pt, expType) {
+            errorLedger.forEach(err => {
+                if (err.pt === pt) {
+                    err.expType = expType;
+                    // Automatically stamp all non-experimental sections as Scored Base
+                    if (err.section !== expType) err.sectionOrigin = 'base'; 
+                }
+            });
+            localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
+            displayErrors(); renderSummary(); renderAnalytics();
+        }
+
         function batchResolve(pt, secNum, originCode) {
-            errorLedger.forEach(err => { if (err.pt === pt && err.secNum === secNum && err.section === "Logical Reasoning") err.lrOrigin = originCode; });
+            errorLedger.forEach(err => { if (err.pt === pt && err.secNum === secNum) err.sectionOrigin = originCode; });
             localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
             displayErrors(); renderSummary(); 
         }
@@ -321,41 +356,56 @@
             container.innerHTML = '';
             if (errorLedger.length === 0) { container.innerHTML = '<div class="card" style="text-align:center; color:#64748b;">No data logged yet. Complete a test and log your errors to view projections.</div>'; return; }
 
+            const ptMeta = {}; 
             const groupedData = {};
+            
             errorLedger.forEach(err => {
-                if (!groupedData[err.pt]) groupedData[err.pt] = {};
+                if (!groupedData[err.pt]) { groupedData[err.pt] = {}; ptMeta[err.pt] = { expType: null }; }
+                if (err.expType) ptMeta[err.pt].expType = err.expType;
                 if (!groupedData[err.pt][err.secNum]) { groupedData[err.pt][err.secNum] = { sectionType: err.section, errors: [], resolvedOrigin: null, latestDate: err.date }; }
+                
                 groupedData[err.pt][err.secNum].errors.push(err);
-                if (err.lrOrigin) groupedData[err.pt][err.secNum].resolvedOrigin = err.lrOrigin;
+                if (err.sectionOrigin) groupedData[err.pt][err.secNum].resolvedOrigin = err.sectionOrigin;
                 if (err.date > groupedData[err.pt][err.secNum].latestDate) groupedData[err.pt][err.secNum].latestDate = err.date; 
             });
 
             Object.keys(groupedData).sort((a,b) => b-a).forEach(ptNum => {
                 let totalScoredMistakes = 0; let hasUnresolved = false; let ptDate = "No Date";
-                const ptDataDict = ptDictionary[ptNum];
+                const expType = ptMeta[ptNum].expType;
 
                 Object.values(groupedData[ptNum]).forEach(sec => {
                     if (sec.latestDate) ptDate = sec.latestDate;
-                    if (sec.sectionType === 'Reading Comprehension') totalScoredMistakes += sec.errors.length;
-                    else if (sec.sectionType === 'Logical Reasoning') {
-                        if (sec.resolvedOrigin === 'base') totalScoredMistakes += sec.errors.length;
-                        else if (!sec.resolvedOrigin) hasUnresolved = true; 
-                    }
+                    if (sec.resolvedOrigin === 'base') { totalScoredMistakes += sec.errors.length; } 
+                    else if (!sec.resolvedOrigin && expType && sec.sectionType === expType) { hasUnresolved = true; } 
+                    else if (!expType) { hasUnresolved = true; }
                 });
 
                 let estScore = totalScoredMistakes < scoreCurve.length ? scoreCurve[totalScoredMistakes] : '< 140';
-                let scoreBadgeHTML = hasUnresolved ? `<span class="warning-badge">⚠️ Resolve LR to unlock Projected Score</span>` : `<span class="score-badge">Projected Score: ${estScore}</span>`;
+                let scoreBadgeHTML = hasUnresolved ? `<span class="warning-badge">⚠️ Resolve Scored vs Experimental to unlock Projection</span>` : `<span class="score-badge">Projected Score: ${estScore}</span>`;
+
+                let ptBannerHTML = '';
+                if (!expType) {
+                    ptBannerHTML = `
+                        <div class="resolver-banner" style="margin: 0 24px 20px 24px; border-color: #fdba74; background: #fff7ed;">
+                            <div class="resolver-text" style="color: #9a3412;">⚠️ <strong>Test Architecture Required.</strong> Which section type did you have an experimental of?</div>
+                            <div class="resolver-buttons">
+                                <button class="btn-resolve base" style="background: #ea580c; border: none;" onclick="setPtStructure('${ptNum}', 'Logical Reasoning')">LR (3 Sections)</button>
+                                <button class="btn-resolve exp" style="background: #ea580c; color: white; border: none;" onclick="setPtStructure('${ptNum}', 'Reading Comprehension')">RC (2 Sections)</button>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 let ptHTML = `
                     <div class="summary-pt-block">
                         <div class="summary-pt-header">
                             <div style="display:flex; align-items:center;">
-                                <span>PrepTest ${ptNum}</span>
-                                <span style="font-size: 13px; color: #94a3b8; margin-left: 10px; font-weight: 500;">(${ptDate})</span>
+                                <span>PrepTest ${ptNum}</span><span style="font-size: 13px; color: #94a3b8; margin-left: 10px; font-weight: 500;">(${ptDate})</span>
                                 <a href="https://lsathacks.com/explanations/lsat-preptest-${ptNum}/" target="_blank" class="pt-link-btn">LSATHacks Menu ↗</a>
                             </div>
                             <div style="display:flex; align-items:center; gap: 16px;">${scoreBadgeHTML}</div>
                         </div>
+                        ${ptBannerHTML}
                 `;
 
                 Object.keys(groupedData[ptNum]).sort().forEach(secNum => {
@@ -367,10 +417,13 @@
                     }).join('');
                     
                     let resolverHTML = '';
-                    if (sec.sectionType === "Logical Reasoning" && ptDataDict && !sec.resolvedOrigin) {
-                        resolverHTML = `<div class="resolver-banner"><div class="resolver-text">⚠️ <strong>Score Calibration Needed.</strong> Was this section Scored or Experimental?</div><div class="resolver-buttons"><button class="btn-resolve base" onclick="batchResolve('${ptNum}', '${secNum}', 'base')">It was Scored</button><button class="btn-resolve exp" onclick="batchResolve('${ptNum}', '${secNum}', 'exp')">It was Experimental</button></div></div>`;
-                    } else if (sec.sectionType === "Logical Reasoning" && sec.resolvedOrigin) {
-                        resolverHTML = `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">✓ Tagged as: ${sec.resolvedOrigin === 'base' ? 'Scored' : 'Experimental'}</div>`;
+                    if (expType) {
+                        if (sec.sectionType === expType && !sec.resolvedOrigin) {
+                            resolverHTML = `<div class="resolver-banner"><div class="resolver-text">⚠️ <strong>Collision Detected.</strong> Was this section Scored or Experimental?</div><div class="resolver-buttons"><button class="btn-resolve base" onclick="batchResolve('${ptNum}', '${secNum}', 'base')">It was Scored</button><button class="btn-resolve exp" onclick="batchResolve('${ptNum}', '${secNum}', 'exp')">It was Experimental</button></div></div>`;
+                        } else if (sec.resolvedOrigin) {
+                            let autoBadge = (sec.sectionType !== expType) ? ' (Auto-resolved)' : '';
+                            resolverHTML = `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">✓ Tagged as: ${sec.resolvedOrigin === 'base' ? 'Scored' : 'Experimental'}${autoBadge}</div>`;
+                        }
                     }
 
                     ptHTML += `
@@ -391,23 +444,17 @@
             let totalValidTypes = 0; let totalValidDiffs = 0; let totalDiffScore = 0;
 
             errorLedger.forEach(item => {
-                // Background sanitation: downgrade legacy 5s to 4s
-                if (item.difficulty === '5') { item.difficulty = '4'; }
-
+                if (item.difficulty === '5') { item.difficulty = '4'; } // background legacy sanitization
                 if(item.type !== 'Pending' && item.type !== '') { typeCounts[item.type] = (typeCounts[item.type] || 0) + 1; totalValidTypes++; }
                 if(item.difficulty && item.difficulty !== 'Pending') { 
-                    diffCounts[item.difficulty]++; 
-                    totalDiffScore += parseInt(item.difficulty);
-                    totalValidDiffs++; 
+                    diffCounts[item.difficulty]++; totalDiffScore += parseInt(item.difficulty); totalValidDiffs++; 
                 }
             });
 
-            // Math execution: Top Type
             let topType = "No Type Assigned"; let maxTypeVal = 0;
             Object.keys(typeCounts).forEach(t => { if(typeCounts[t] > maxTypeVal) { maxTypeVal = typeCounts[t]; topType = t; } });
             if (totalValidTypes > 0) { document.getElementById('analyticsTopType').innerText = topType; document.getElementById('analyticsTopTypeSub').innerText = `Accounts for ${Math.round((maxTypeVal / totalValidTypes) * 100)}% of your categorized analytical blindspots.`; }
 
-            // NEW Math execution: Average Difficulty Mean
             if (totalValidDiffs > 0) {
                 let avgDiff = (totalDiffScore / totalValidDiffs).toFixed(2);
                 document.getElementById('analyticsTopDiff').innerText = `Level ${avgDiff} Avg`;
@@ -425,7 +472,6 @@
             const diffBarsContainer = document.getElementById('diffBars'); diffBarsContainer.innerHTML = '';
             if(totalValidDiffs === 0) { diffBarsContainer.innerHTML = '<div style="color:#94a3b8; font-size:13px;">No data to chart.</div>'; }
             else {
-                // Find max diff count for scaling bars relative to each other
                 let maxDiffBarVal = Math.max(diffCounts['1'], diffCounts['2'], diffCounts['3'], diffCounts['4']);
                 for(let i=1; i<=4; i++) {
                     let w = maxDiffBarVal > 0 ? Math.round((diffCounts[i.toString()] / maxDiffBarVal) * 100) : 0;
@@ -438,11 +484,8 @@
             errorLedger.forEach(err => {
                 if (!ptScoreData[err.pt]) ptScoreData[err.pt] = { date: err.date, scoredErrors: 0, hasUnresolved: false };
                 if (err.date > ptScoreData[err.pt].date) ptScoreData[err.pt].date = err.date; 
-                if (err.section === 'Reading Comprehension') ptScoreData[err.pt].scoredErrors++;
-                else if (err.section === 'Logical Reasoning') {
-                    if (err.lrOrigin === 'base') ptScoreData[err.pt].scoredErrors++;
-                    else if (!err.lrOrigin) ptScoreData[err.pt].hasUnresolved = true;
-                }
+                if (err.sectionOrigin === 'base') { ptScoreData[err.pt].scoredErrors++; } 
+                else if (!err.sectionOrigin) { ptScoreData[err.pt].hasUnresolved = true; }
             });
 
             let plotPoints = [];
@@ -506,7 +549,6 @@
         function saveJournalEdit(id) { const newText = document.getElementById(`edit-journal-${id}`).value.trim(); const i = errorLedger.findIndex(e => e.id === id); if(i !== -1) { errorLedger[i].text = newText; localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); } }
 
         function displayErrors() {
-            // STATE PRESERVATION: Capture open folders before rebuilding
             let openDetails = new Set();
             document.querySelectorAll('details[open]').forEach(d => { if(d.id) openDetails.add(d.id); });
 
@@ -529,7 +571,6 @@
                 let ptId = `pt-block-${pt}`;
                 ptBlock.id = ptId;
 
-                // Restore open state (or open the first PT if it's the very first time loading the page)
                 if (openDetails.has(ptId) || (index === 0 && !window.hasRenderedOnce)) ptBlock.open = true;
 
                 let ptTotal = 0; let secHTML = '';
@@ -570,7 +611,6 @@
                         `;
                     });
 
-                    // Restore internal section open state
                     let secId = `sec-block-${pt}-${secNum.replace(/[^a-zA-Z0-9]/g, '-')}`;
                     let secOpenAttr = openDetails.has(secId) || !window.hasRenderedOnce ? 'open' : '';
 
