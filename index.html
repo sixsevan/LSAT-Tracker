@@ -34,16 +34,16 @@
 
         /* Tags & Inline Selects */
         .tags-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
-        .error-tag { font-size: 12px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #475569; transition: all 0.2s ease; }
+        .error-tag { font-size: 12px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #475569; transition: all 0.2s ease; cursor: pointer; }
         .error-tag:hover { background: #e2e8f0; }
         .type-tag { background: #e0e7ff; color: #3730a3; } .type-tag:hover { background: #c7d2fe; }
         
-        .diff-tag { font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 700; transition: all 0.2s; }
+        /* Level 1-4 Difficulty Colors */
+        .diff-tag { font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 700; transition: all 0.2s; cursor: pointer; }
         .diff-1 { background: #dcfce7; color: #166534; }
         .diff-2 { background: #fef08a; color: #854d0e; }
-        .diff-3 { background: #fde047; color: #a16207; }
-        .diff-4 { background: #fed7aa; color: #9a3412; }
-        .diff-5 { background: #fecaca; color: #991b1b; }
+        .diff-3 { background: #fed7aa; color: #9a3412; }
+        .diff-4 { background: #fecaca; color: #991b1b; }
 
         .inline-select { padding: 6px 30px 6px 12px; font-size: 12px; font-weight: 600; border-radius: 20px; border: 1px dashed #94a3b8; background-color: #f8fafc; color: #475569; cursor: pointer; background-position: right 10px top 50%; background-size: 8px auto; transition: all 0.2s ease; }
         .inline-select:hover { border-style: solid; border-color: #64748b; background-color: #f1f5f9; }
@@ -119,9 +119,8 @@
         .bar-fill.type-fill { background: #6366f1; }
         .bar-fill.diff-1 { background: #22c55e; }
         .bar-fill.diff-2 { background: #eab308; }
-        .bar-fill.diff-3 { background: #eab308; }
-        .bar-fill.diff-4 { background: #f97316; }
-        .bar-fill.diff-5 { background: #ef4444; }
+        .bar-fill.diff-3 { background: #f97316; }
+        .bar-fill.diff-4 { background: #ef4444; }
         .bar-count { margin-left: 12px; font-size: 12px; font-weight: 700; color: #64748b; width: 30px; }
 
         /* SVG Line Chart */
@@ -178,8 +177,7 @@
                             <option value="1">Level 1 (Easiest)</option>
                             <option value="2">Level 2</option>
                             <option value="3">Level 3</option>
-                            <option value="4">Level 4</option>
-                            <option value="5">Level 5 (Hardest)</option>
+                            <option value="4">Level 4 (Hardest)</option>
                         </select>
                     </div>
                 </div>
@@ -192,7 +190,7 @@
 
         <div id="page-history" class="page">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                <div><h2>Your Logged Mistakes</h2><p style="color: #64748b; margin-top: -20px; font-size: 15px;">Navigate your history. Double-click any date, blue tag, or difficulty pill to re-edit.</p></div>
+                <div><h2>Your Logged Mistakes</h2><p style="color: #64748b; margin-top: -20px; font-size: 15px;">Navigate your history. Click any date, blue tag, or difficulty pill to re-edit.</p></div>
             </div>
             <div id="bulkActionBar" class="bulk-action-bar" style="display: none;">
                 <div class="checkbox-container"><input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)"><span style="font-size: 14px; font-weight: 600; color: #475569;" id="selectedCountText">Select All</span></div>
@@ -261,6 +259,7 @@
         document.getElementById('ptDate').valueAsDate = new Date();
         let errorLedger = JSON.parse(localStorage.getItem('lsatErrors')) || [];
         let selectedIds = new Set();
+        window.hasRenderedOnce = false; // Tracks first app load
         
         displayErrors(); renderSummary();
 
@@ -388,26 +387,31 @@
 
         function renderAnalytics() {
             if (errorLedger.length === 0) return;
-            const typeCounts = {}; const diffCounts = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 };
-            let totalValidTypes = 0; let totalValidDiffs = 0;
+            const typeCounts = {}; const diffCounts = { "1": 0, "2": 0, "3": 0, "4": 0 };
+            let totalValidTypes = 0; let totalValidDiffs = 0; let totalDiffScore = 0;
 
             errorLedger.forEach(item => {
+                // Background sanitation: downgrade legacy 5s to 4s
+                if (item.difficulty === '5') { item.difficulty = '4'; }
+
                 if(item.type !== 'Pending' && item.type !== '') { typeCounts[item.type] = (typeCounts[item.type] || 0) + 1; totalValidTypes++; }
-                if(item.difficulty && item.difficulty !== 'Pending') { diffCounts[item.difficulty]++; totalValidDiffs++; }
+                if(item.difficulty && item.difficulty !== 'Pending') { 
+                    diffCounts[item.difficulty]++; 
+                    totalDiffScore += parseInt(item.difficulty);
+                    totalValidDiffs++; 
+                }
             });
 
+            // Math execution: Top Type
             let topType = "No Type Assigned"; let maxTypeVal = 0;
             Object.keys(typeCounts).forEach(t => { if(typeCounts[t] > maxTypeVal) { maxTypeVal = typeCounts[t]; topType = t; } });
             if (totalValidTypes > 0) { document.getElementById('analyticsTopType').innerText = topType; document.getElementById('analyticsTopTypeSub').innerText = `Accounts for ${Math.round((maxTypeVal / totalValidTypes) * 100)}% of your categorized analytical blindspots.`; }
 
-            let topDiff = "None"; let maxDiffVal = -1;
-            Object.keys(diffCounts).forEach(d => { if(diffCounts[d] > maxDiffVal) { maxDiffVal = diffCounts[d]; topDiff = d; } });
-            if (totalValidDiffs > 0 && maxDiffVal > 0) {
-                document.getElementById('analyticsTopDiff').innerText = `Level ${topDiff} Complexity`;
-                let diag = "Isolating upper-tier execution limits.";
-                if(topDiff === '1' || topDiff === '2') diag = "⚠️ High density of early-trap errors. Check speed/reading.";
-                if(topDiff === '3') diag = "Struggling in the structural transition zone.";
-                document.getElementById('analyticsTopDiffSub').innerText = `${Math.round((maxDiffVal / totalValidDiffs) * 100)}% total frequency. ${diag}`;
+            // NEW Math execution: Average Difficulty Mean
+            if (totalValidDiffs > 0) {
+                let avgDiff = (totalDiffScore / totalValidDiffs).toFixed(2);
+                document.getElementById('analyticsTopDiff').innerText = `Level ${avgDiff} Avg`;
+                document.getElementById('analyticsTopDiffSub').innerText = `Calculated across ${totalValidDiffs} valid entries. Isolating your execution threshold.`;
             }
 
             const typeBarsContainer = document.getElementById('typeBars'); typeBarsContainer.innerHTML = '';
@@ -421,8 +425,10 @@
             const diffBarsContainer = document.getElementById('diffBars'); diffBarsContainer.innerHTML = '';
             if(totalValidDiffs === 0) { diffBarsContainer.innerHTML = '<div style="color:#94a3b8; font-size:13px;">No data to chart.</div>'; }
             else {
-                for(let i=1; i<=5; i++) {
-                    let w = maxDiffVal > 0 ? Math.round((diffCounts[i.toString()] / maxDiffVal) * 100) : 0;
+                // Find max diff count for scaling bars relative to each other
+                let maxDiffBarVal = Math.max(diffCounts['1'], diffCounts['2'], diffCounts['3'], diffCounts['4']);
+                for(let i=1; i<=4; i++) {
+                    let w = maxDiffBarVal > 0 ? Math.round((diffCounts[i.toString()] / maxDiffBarVal) * 100) : 0;
                     diffBarsContainer.innerHTML += `<div class="bar-row"><div class="bar-label">Level ${i}</div><div class="bar-track"><div class="bar-fill diff-${i}" style="width: ${w}%"></div></div><div class="bar-count">${diffCounts[i.toString()]}</div></div>`;
                 }
             }
@@ -469,11 +475,10 @@
         // ---------------- DATA EDITING & REVERTS ----------------
         function checkCompleteness(item) { return (item.type !== 'Pending' && item.type !== '' && item.difficulty !== 'Pending' && item.difficulty !== '') ? 'Complete' : 'Draft'; }
         
-        // NEW DATE EDITING FUNCTIONS
         function enableDateEdit(id) {
             const item = errorLedger.find(e => e.id === id);
             const wrapper = document.getElementById(`date-wrapper-${id}`);
-            wrapper.removeAttribute('ondblclick');
+            wrapper.removeAttribute('onclick');
             wrapper.innerHTML = `<input type="date" class="inline-date" value="${item.date || ''}" onchange="saveDateEdit(${id}, this.value)" onblur="displayErrors()">`;
         }
         
@@ -482,9 +487,7 @@
             if(item && newDate) {
                 if(confirm(`Update the date to ${newDate} for ALL mistakes in PrepTest ${item.pt}?`)) {
                     errorLedger.forEach(err => { if(err.pt === item.pt) err.date = newDate; });
-                } else {
-                    item.date = newDate;
-                }
+                } else { item.date = newDate; }
                 localStorage.setItem('lsatErrors', JSON.stringify(errorLedger));
                 displayErrors(); renderSummary(); renderAnalytics();
             }
@@ -503,6 +506,10 @@
         function saveJournalEdit(id) { const newText = document.getElementById(`edit-journal-${id}`).value.trim(); const i = errorLedger.findIndex(e => e.id === id); if(i !== -1) { errorLedger[i].text = newText; localStorage.setItem('lsatErrors', JSON.stringify(errorLedger)); displayErrors(); } }
 
         function displayErrors() {
+            // STATE PRESERVATION: Capture open folders before rebuilding
+            let openDetails = new Set();
+            document.querySelectorAll('details[open]').forEach(d => { if(d.id) openDetails.add(d.id); });
+
             const container = document.getElementById('errorList'); const bulkBar = document.getElementById('bulkActionBar'); container.innerHTML = ''; 
             if (errorLedger.length === 0) { container.innerHTML = '<em>No errors logged yet. Master your logic inputs on the home tab!</em>'; bulkBar.style.display = 'none'; return; }
             bulkBar.style.display = 'flex'; updateBulkUI(); 
@@ -517,8 +524,13 @@
             const sortedPTs = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
 
             sortedPTs.forEach((pt, index) => {
-                const ptBlock = document.createElement('details'); ptBlock.className = 'group-details';
-                if (index === 0) ptBlock.open = true;
+                const ptBlock = document.createElement('details'); 
+                ptBlock.className = 'group-details';
+                let ptId = `pt-block-${pt}`;
+                ptBlock.id = ptId;
+
+                // Restore open state (or open the first PT if it's the very first time loading the page)
+                if (openDetails.has(ptId) || (index === 0 && !window.hasRenderedOnce)) ptBlock.open = true;
 
                 let ptTotal = 0; let secHTML = '';
                 const sortedSecs = Object.keys(grouped[pt]).sort();
@@ -528,7 +540,7 @@
                     let cardsHTML = '';
                     
                     sec.errors.sort((a, b) => Number(a.qNum) - Number(b.qNum)).forEach(item => {
-                        let dateHTML = `<span class="error-tag" id="date-wrapper-${item.id}" ondblclick="enableDateEdit(${item.id})" style="cursor:pointer;" title="Double-click to edit date">📅 ${item.date || 'No Date'}</span>`;
+                        let dateHTML = `<span class="error-tag" id="date-wrapper-${item.id}" onclick="enableDateEdit(${item.id})" style="cursor:pointer;" title="Click to edit date">📅 ${item.date || 'No Date'}</span>`;
 
                         let typeHTML = '';
                         if (item.type === 'Pending' || item.type === '') {
@@ -536,12 +548,12 @@
                             let optionsString = '<option value="" disabled selected>Assign Type...</option>'; 
                             optionsArray.forEach(opt => { optionsString += `<option value="${opt}">${opt}</option>`; });
                             typeHTML = `<select class="inline-select" onchange="updateErrorType(${item.id}, this.value)">${optionsString}</select>`;
-                        } else { typeHTML = `<span class="error-tag type-tag" ondblclick="revertToDraft(${item.id})" style="cursor:pointer;" title="Double-click to edit">${item.type}</span>`; }
+                        } else { typeHTML = `<span class="error-tag type-tag" onclick="revertToDraft(${item.id})" style="cursor:pointer;" title="Click to edit type">${item.type}</span>`; }
 
                         let diffHTML = '';
                         if (item.difficulty === 'Pending' || !item.difficulty) {
-                            diffHTML = `<select class="inline-select" onchange="updateErrorDifficulty(${item.id}, this.value)"><option value="" disabled selected>Diff...</option><option value="1">Lvl 1</option><option value="2">Lvl 2</option><option value="3">Lvl 3</option><option value="4">Lvl 4</option><option value="5">Lvl 5</option></select>`;
-                        } else { diffHTML = `<span class="diff-tag diff-${item.difficulty}" ondblclick="revertDifficultyToDraft(${item.id})" style="cursor:pointer;" title="Double-click to edit">Level ${item.difficulty}</span>`; }
+                            diffHTML = `<select class="inline-select" onchange="updateErrorDifficulty(${item.id}, this.value)"><option value="" disabled selected>Diff...</option><option value="1">Lvl 1</option><option value="2">Lvl 2</option><option value="3">Lvl 3</option><option value="4">Lvl 4</option></select>`;
+                        } else { diffHTML = `<span class="diff-tag diff-${item.difficulty}" onclick="revertDifficultyToDraft(${item.id})" style="cursor:pointer;" title="Click to edit difficulty">Level ${item.difficulty}</span>`; }
 
                         const journalContent = item.text ? `<p class="journal-text">${item.text}</p>` : `<p class="journal-empty">Double-click here to add an analysis journal...</p>`;
                         const isChecked = selectedIds.has(item.id) ? 'checked' : '';
@@ -558,8 +570,12 @@
                         `;
                     });
 
+                    // Restore internal section open state
+                    let secId = `sec-block-${pt}-${secNum.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                    let secOpenAttr = openDetails.has(secId) || !window.hasRenderedOnce ? 'open' : '';
+
                     secHTML += `
-                        <details class="sec-details" open>
+                        <details class="sec-details" id="${secId}" ${secOpenAttr}>
                             <summary class="sec-summary"><span style="display:flex; justify-content:space-between; width:100%; align-items:center;"><span>${secNum} <span style="color:#64748b; font-weight:500; font-size:13px; margin-left:8px;">(${sec.sectionType})</span></span><span style="color:#94a3b8; font-size:13px;">${sec.errors.length} Mistakes</span></span></summary>
                             <div class="sec-content">${cardsHTML}</div>
                         </details>
@@ -569,6 +585,7 @@
                 ptBlock.innerHTML = `<summary class="group-summary"><span style="display:flex; justify-content:space-between; width:100%; align-items:center; padding-right:12px;"><span>PrepTest ${pt}</span><span style="color:#64748b; font-size:15px; font-weight:500;">${ptTotal} Mistakes</span></span></summary><div class="details-content">${secHTML}</div>`;
                 container.appendChild(ptBlock);
             });
+            window.hasRenderedOnce = true;
         }
     </script>
 </body>
